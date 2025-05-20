@@ -1,0 +1,688 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout</title>
+    <style>
+        /* General Styles */
+ body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      background-color: #f4f7f9;
+      color: #333;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: #2c3e50;
+      color: white;
+      padding: 25px 20px;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .sidebar h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 22px;
+      color: #f1c40f;
+      margin: 0;
+      text-align: center;
+      line-height: 1.4;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .user-info {
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    .user-info p {
+      font-weight: 600;
+      margin: 5px 0 3px;
+      font-size: 14px;
+      color: white; /* <-- add this line */
+    }
+
+    .user-indicator {
+      display: inline-block;
+      background: #27ae60;
+      color: white;
+      padding: 2px 8px;
+      font-size: 12px;
+      border-radius: 12px;
+      margin-top: 3px;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 30px;
+    }
+
+    .sidebar ul li a {
+      color: white;
+      text-decoration: none;
+      display: block;
+      padding: 12px 15px;
+      border-radius: 6px;
+      transition: background 0.3s, transform 0.2s;
+      font-size: 15px;
+    }
+
+    .sidebar ul li a:hover {
+      background: #34495e;
+      transform: translateX(6px);
+    }
+
+    .main-content {
+      margin-left: 280px;
+      padding: 30px;
+      width: calc(100% - 280px);
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      color: #2980b9;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+        /* Content Section */
+        .content {
+            margin-left: 280px;
+            padding: 30px;
+            width: 100%;
+        }
+
+        .checkout-form {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 900px;
+            margin: auto;
+        }
+
+
+        .checkout-form label {
+            font-size: 16px;
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+
+        .checkout-form input,
+        .checkout-form select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: 1px solid #bdc3c7;
+            font-size: 14px;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        .checkout-form input:focus,
+        .checkout-form select:focus {
+            border-color: #2980b9;
+        }
+
+        .checkout-form button {
+            padding: 10px 20px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .checkout-form button:hover {
+            background-color: #c0392b;
+        }
+
+        /* Product Table */
+        .product-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-table th,
+        .product-table td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .product-table th {
+            background-color: #e74c3c;
+            color: white;
+            font-weight: bold;
+        }
+
+        .product-table tr:hover {
+            background: #ecf0f1;
+            transition: background 0.3s;
+        }
+
+        .product-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 5px;
+        }
+
+        /* Customer Details Card */
+        .customer-details-card {
+            background-color: #ffffff;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .customer-details-card h2 {
+            margin-top: 0;
+            font-size: 20px;
+            color: #2c3e50;
+        }
+
+        .customer-details-card p {
+            margin: 0;
+            font-size: 16px;
+            color: #7f8c8d;
+        }
+
+        .customer-details-card .edit-btn,
+        .customer-details-card .save-btn {
+            margin-top: 10px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+
+        .customer-details-card .save-btn {
+            display: none;
+        }
+
+        .customer-details-card .saved-message {
+            color: #27ae60;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .empty-cart-alert {
+            color: white;
+            background-color: #e74c3c;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .btn {
+            width: 100%;
+            background: #ff5722;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn:hover { background: #e04d1f; }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+    </style>
+
+</head>
+<body>
+
+    <!-- Sidebar -->
+       <div class="sidebar">
+  <h1>Bare Bears<br>Kadayawan</h1>
+  <div class="user-info">
+    <p>Welcome, {{ username }}!</p>
+    <span class="user-indicator">User</span>
+  </div>
+
+  <ul>
+    <li><a href="{% url 'user_ordering' %}" class="hover-effect">Ordering</a></li>
+  </ul>
+</div>
+
+    <!-- Main Content -->
+    <div class="content">
+        <center><h1>Checkout Page</h1></center>
+
+        <!-- Display Empty Cart Alert if Cart is Empty -->
+        <div id="empty-cart-message" class="empty-cart-alert" style="display: none;">
+            No items in your cart.
+        </div>
+
+        <!-- Checkout Form -->
+        <div class="checkout-form">
+            
+            <!-- Customer Details Card -->
+            <div class="customer-details-card">
+                <h2>Customer Details</h2>
+                
+                <p id="customer-name"><strong>Name:</strong> {{ username }}</p>
+                <p id="customer-phone">63+</p>
+                <p id="customer-address">Davao City</p>
+
+                <!-- Edit Button -->
+                <button class="edit-btn" onclick="editDetails()">Change</button>
+                
+                <!-- Save Button (hidden initially) -->
+                <button class="save-btn" onclick="saveDetails()">Save</button>
+                
+                <!-- Message when saved -->
+                <p class="saved-message" style="display: none;" id="saved-message">Your details have been saved!</p>
+            </div>
+
+            <hr>
+
+            <!-- Product Details -->
+            <h2>Product Details</h2>
+            <table class="product-table" id="cart-table">
+                <thead>
+                    <tr>
+                        <th>Product Image</th>
+                        <th>Product Name</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Action</th> <!-- New column for Remove button -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Cart items will be populated here using JavaScript -->
+                </tbody>
+            </table>
+            
+            <hr>
+
+            <!-- Shipping Method -->
+            <div class="section">
+                <h3>Shipping</h3>
+                <select id="shipping" onchange="updateTotal()">
+                    <option value="" selected disabled>Select Logistics</option>
+                    <option value="0">Store Pick-Up - ₱0</option>
+                    <option value="50">Shopee Xpress - ₱50</option>
+                    <option value="60">J&T Express - ₱60</option>
+                    <option value="75">Ninja Van - ₱75</option>
+                    <option value="100">LBC Express - ₱100</option>
+                </select>
+            </div>
+
+
+            <!-- Mode of Payment -->
+            <h3>Mode of Payment</h3>
+            <select id="payment-method" name="payment-method">
+                <option value="Cash On Delivery">Cash on Delivery</option>
+                <option value="Store Pick-up">Store Pick-Up</option>
+            </select>
+
+            <hr>
+
+            <p>Merchandise Subtotal: <span id="merchandise-subtotal">₱0.00</span></p>
+            <p>Shipping Subtotal: <span id="shipping-subtotal">₱0.00</span></p>
+
+
+            <p><strong>Total Payment: <span id="total-price">0.00</span></strong></p>
+
+            <button class="btn" onclick="saveOrderToDatabase()">Place Order</button>
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const cart = JSON.parse(localStorage.getItem("cart")) || [];
+                const cartTable = document.getElementById("cart-table")?.getElementsByTagName("tbody")[0];
+                const totalPriceElement = document.getElementById("total-price");
+                const paymentMethodSelect = document.getElementById("payment-method");
+                const emptyCartMessage = document.getElementById("empty-cart-message");
+        
+                const savedPayment = localStorage.getItem("paymentMethod");
+                if (savedPayment) {
+                    paymentMethodSelect.value = savedPayment;
+                    handlePaymentMethodChange(); // Run handler on load
+                }
+        
+                if (cart.length === 0 && emptyCartMessage && cartTable) {
+                    emptyCartMessage.style.display = 'block';
+                    cartTable.innerHTML = "";
+                } else if (cartTable) {
+                    emptyCartMessage.style.display = 'none';
+                    cartTable.innerHTML = "";
+                    let totalPrice = 0;
+        
+                    cart.forEach((item, index) => {
+                        const row = cartTable.insertRow();
+                        const productTotal = item.price * item.quantity;
+                        totalPrice += productTotal;
+        
+                        row.innerHTML = `
+                            <td><img src="${item.image}" alt="${item.name}" class="product-image"></td>
+                            <td>${item.name}</td>
+                            <td>₱${item.price.toFixed(2)}</td>
+                            <td>${item.quantity}</td>
+                            <td><button class="remove-btn" onclick="removeItem(${index})">Remove</button></td>
+                        `;
+                    });
+        
+                    totalPriceElement.textContent = `₱${totalPrice.toFixed(2)}`;
+                }
+        
+                paymentMethodSelect.addEventListener("change", function () {
+                    localStorage.setItem("paymentMethod", paymentMethodSelect.value);
+                    handlePaymentMethodChange(); // Also call here to dynamically handle changes
+                });
+        
+                updateTotal();
+            });
+        
+            // Function: Disable logistics if Store Pick-Up is selected
+            function handlePaymentMethodChange() {
+                const paymentMethod = document.getElementById("payment-method").value;
+                const shippingSelect = document.getElementById("shipping");
+        
+                if (paymentMethod === "Store Pick-up") {
+                    shippingSelect.value = "0"; // Force set to ₱0 store pickup
+                    shippingSelect.disabled = true;
+                } else {
+                    shippingSelect.disabled = false;
+                }
+        
+                updateTotal(); // Recalculate totals
+            }
+        
+            function removeItem(index) {
+                let cart = JSON.parse(localStorage.getItem("cart")) || [];
+                cart.splice(index, 1);
+                localStorage.setItem("cart", JSON.stringify(cart));
+                updateCartUI(cart);
+            }
+        
+            function updateCartUI(cart) {
+                const cartTable = document.getElementById("cart-table").getElementsByTagName("tbody")[0];
+                const totalPriceElement = document.getElementById("total-price");
+                const merchandiseSubtotalElement = document.getElementById("merchandise-subtotal");
+                const shippingSubtotalElement = document.getElementById("shipping-subtotal");
+                const shippingSelect = document.getElementById("shipping");
+        
+                cartTable.innerHTML = '';
+                let merchandiseSubtotal = 0;
+        
+                cart.forEach((item, index) => {
+                    const row = cartTable.insertRow();
+                    const productTotal = item.price * item.quantity;
+                    merchandiseSubtotal += productTotal;
+        
+                    row.innerHTML = `
+                        <td><img src="${item.image}" alt="${item.name}" class="product-image"></td>
+                        <td>${item.name}</td>
+                        <td>₱${item.price.toFixed(2)}</td>
+                        <td>${item.quantity}</td>
+                        <td><button class="remove-btn" onclick="removeItem(${index})">Remove</button></td>
+                    `;
+                });
+        
+                let shippingCost = parseFloat(shippingSelect.value) || 0;
+        
+                merchandiseSubtotalElement.textContent = `₱${merchandiseSubtotal.toFixed(2)}`;
+                shippingSubtotalElement.textContent = `₱${shippingCost.toFixed(2)}`;
+                totalPriceElement.textContent = `₱${(merchandiseSubtotal + shippingCost).toFixed(2)}`;
+            }
+        
+            function updateTotal() {
+                const cart = JSON.parse(localStorage.getItem("cart")) || [];
+                const shippingSelect = document.getElementById("shipping");
+                const paymentMethod = document.getElementById("payment-method").value;
+        
+                let selectedShipping = shippingSelect.value;
+                let shippingCost = parseFloat(selectedShipping) || 0;
+        
+                const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+                const merchandiseSubtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        
+                let newOptions = totalItems > 3 ? `
+                    <option value="" disabled>Select Logistics</option>
+                    <option value="0">Store Pick-Up - ₱0</option>
+                    <option value="80">Shopee Xpress - ₱80</option>
+                    <option value="90">J&T Express - ₱90</option>
+                    <option value="105">Ninja Van - ₱105</option>
+                    <option value="130">LBC Express - ₱130</option>
+                ` : `
+                    <option value="" disabled>Select Logistics</option>
+                    <option value="0">Store Pick-Up - ₱0</option>
+                    <option value="50">Shopee Xpress - ₱50</option>
+                    <option value="60">J&T Express - ₱60</option>
+                    <option value="75">Ninja Van - ₱75</option>
+                    <option value="100">LBC Express - ₱100</option>
+                `;
+        
+                if (shippingSelect.innerHTML !== newOptions) {
+                    shippingSelect.innerHTML = newOptions;
+                }
+        
+                if (paymentMethod === "Store Pick-up") {
+                    shippingSelect.value = "0";
+                    shippingCost = 0;
+                } else if (selectedShipping && document.querySelector(`#shipping option[value="${selectedShipping}"]`)) {
+                    shippingSelect.value = selectedShipping;
+                    shippingCost = parseFloat(selectedShipping);
+                } else {
+                    shippingSelect.value = "";
+                    shippingCost = 0;
+                }
+        
+                document.getElementById("merchandise-subtotal").textContent = `₱${merchandiseSubtotal.toFixed(2)}`;
+                document.getElementById("shipping-subtotal").textContent = `₱${shippingCost.toFixed(2)}`;
+                document.getElementById("total-price").textContent = `₱${(merchandiseSubtotal + shippingCost).toFixed(2)}`;
+            }
+        
+            // Function to update the cart UI and calculate the total price
+            // Updates the UI and totals
+            function updateCartUI(cart) {
+                const cartTable = document.getElementById("cart-table").getElementsByTagName("tbody")[0];
+                cartTable.innerHTML = '';
+        
+                let merchandiseSubtotal = 0;
+        
+                cart.forEach((item, index) => {
+                    const row = cartTable.insertRow();
+                    const productTotal = item.price * item.quantity;
+                    merchandiseSubtotal += productTotal;
+        
+                    row.innerHTML = `
+                        <td><img src="${item.image}" alt="${item.name}" class="product-image"></td>
+                        <td>${item.name}</td>
+                        <td>₱${item.price.toFixed(2)}</td>
+                        <td>${item.quantity}</td>
+                        <td><button class="remove-btn" onclick="removeItem(${index})">Remove</button></td>
+                    `;
+                });
+        
+                document.getElementById("merchandise-subtotal").textContent = `₱${merchandiseSubtotal.toFixed(2)}`;
+        
+                updateTotal(); // Ensure totals are updated
+            }
+        
+            // Removes an item and updates the UI
+            function removeItem(index) {
+                let cart = JSON.parse(localStorage.getItem("cart")) || [];
+                cart.splice(index, 1);
+                localStorage.setItem("cart", JSON.stringify(cart));
+                updateCartUI(cart);
+            }
+        
+            // Ensure updateTotal() runs on page load
+            document.addEventListener("DOMContentLoaded", function () {
+                updateTotal();
+            });
+        
+            // Edit customer details
+            function editDetails() {
+                const nameText = document.getElementById("customer-name").textContent.replace("Name: ", "").trim();
+                const phoneText = document.getElementById("customer-phone").textContent.replace("Phone Number: ", "").trim();
+                const addressText = document.getElementById("customer-address").textContent.replace("Address: ", "").trim();
+        
+                document.getElementById("customer-name").innerHTML = `
+                    <strong>Name:</strong>
+                    <input type="text" id="edit-name" value="${nameText}" class="edit-input">
+                `;
+                document.getElementById("customer-phone").innerHTML = `
+                    <strong>Phone Number:</strong>
+                    <input type="text" id="edit-phone" value="${phoneText}" class="edit-input">
+                `;
+                document.getElementById("customer-address").innerHTML = `
+                    <strong>Address:</strong>
+                    <input type="text" id="edit-address" value="${addressText}" class="edit-input">
+                `;
+        
+                document.querySelector(".edit-btn").style.display = 'none';
+                document.querySelector(".save-btn").style.display = 'inline-block';
+            }
+        
+            // Save edited details to localStorage
+            function saveDetails() {
+                const newName = document.getElementById("edit-name").value.trim();
+                const newPhone = document.getElementById("edit-phone").value.trim();
+                const newAddress = document.getElementById("edit-address").value.trim();
+        
+                if (!newName || !newPhone || !newAddress) {
+                    alert("Please fill in all details before saving.");
+                    return;
+                }
+        
+                // Save in localStorage
+                const customerData = { name: newName, phone: newPhone, address: newAddress };
+                localStorage.setItem("customerDetails", JSON.stringify(customerData));
+        
+                // Update UI with labels (ensuring labels are not editable)
+                document.getElementById("customer-name").innerHTML = `<strong>Name:</strong> ${newName}`;
+                document.getElementById("customer-phone").innerHTML = `<strong>Phone Number:</strong> ${newPhone}`;
+                document.getElementById("customer-address").innerHTML = `<strong>Address:</strong> ${newAddress}`;
+        
+                document.getElementById("saved-message").style.display = 'inline-block';
+        
+                document.querySelector(".edit-btn").style.display = 'inline-block';
+                document.querySelector(".save-btn").style.display = 'none';
+            }
+        
+            // Load saved details from localStorage
+            document.addEventListener("DOMContentLoaded", function () {
+                const savedData = localStorage.getItem("customerDetails");
+        
+                if (savedData) {
+                    const { name, phone, address } = JSON.parse(savedData);
+                    if (name) {
+                    document.getElementById("customer-name").innerHTML = `<strong>Name:</strong> ${name}`;
+                    } else {
+                    document.getElementById("customer-name").innerHTML = `<strong>Name:</strong> {{ username }}`;
+                    }
+                    document.getElementById("customer-phone").innerHTML = `<strong>Phone Number:</strong> ${phone || "N/A"}`;
+                    document.getElementById("customer-address").innerHTML = `<strong>Address:</strong> ${address || "N/A"}`;
+                }
+            });
+        
+            function generateTrackingId() {
+                const prefix = "BB-"; // Bare Bears prefix
+                const timestamp = Date.now().toString(36); // Convert current timestamp to base36 string
+                const randomChars = Math.random().toString(36).substring(2, 8).toUpperCase(); // Add some random characters
+                return prefix + timestamp + randomChars;
+            }
+        
+            function getCSRFToken() {
+                return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            }
+        
+            function saveOrderToDatabase() {
+    const customerData = JSON.parse(localStorage.getItem("customerDetails")) || {};
+    const orders = JSON.parse(localStorage.getItem("cart")) || [];
+    const shippingSelect = document.getElementById("shipping");
+    const shippingCost = parseFloat(shippingSelect.value) || 0;
+    const checkoutDetails = JSON.parse(localStorage.getItem("checkoutDetails")) || {};
+    const merchandiseSubtotalElement = document.getElementById("merchandise-subtotal");
+    const merchandiseSubtotal = parseFloat(merchandiseSubtotalElement.textContent.replace('₱', '').replace(',', '')) || 0;
+
+    // Generate tracking ID on the frontend
+    let trackingId = generateTrackingId();
+    console.log("Generated Tracking ID:", trackingId);
+
+    // Debug: Inspect customerData object
+    console.log("Customer Data from localStorage:", customerData);
+
+    // Debug: Inspect the phone number right before constructing orderData
+    if (customerData && customerData.phone) {
+        console.log("Phone Number before sending:", customerData.phone);
+        console.log("Length of Phone Number:", customerData.phone.length); // Check the length
+        console.log("Phone Number as Array:", Array.from(customerData.phone)); // See individual characters
+    } else {   
+        console.warn("Customer phone number is missing or undefined.");
+    }
+
+    const orderData = {
+        customer_name: customerData.name,
+        customer_phone: customerData.phone,
+        customer_address: customerData.address,
+        total_price: (merchandiseSubtotal + shippingCost).toFixed(2),
+        shipping_subtotal: shippingCost.toFixed(2),
+        payment_method: localStorage.getItem("paymentMethod") || checkoutDetails.paymentMethod || "N/A",
+        order_items: orders.map(item => ({
+            name: item.name,
+            price: parseFloat(item.price).toFixed(2),
+            quantity: item.quantity,
+            image: item.image,
+        })),
+        tracking_id: trackingId,
+    };
+
+    console.log("Order Data being sent:", orderData);
+
+    fetch("http://127.0.0.1:8000/api/save-tracking/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCSRFToken()
+        },
+        body: JSON.stringify(orderData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Server response:", data);
+        alert(`✅ Order placed successfully!`);
+        localStorage.removeItem("cart");
+        window.location.href = "/user-ordering-tracking/";
+    })
+    .catch(error => {
+        console.error("Error saving order:", error);
+        alert("❌ Failed to save order.");
+    });
+}
+        
+        </script>
+</body>
+</html>

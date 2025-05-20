@@ -1,0 +1,861 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS - Bare Bears</title>
+</head>
+
+
+<style>
+  
+ body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      background-color: #f4f7f9;
+      color: #333;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: #2c3e50;
+      color: white;
+      padding: 25px 20px;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .sidebar h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 22px;
+      color: #f1c40f;
+      margin: 0;
+      text-align: center;
+      line-height: 1.4;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .user-info {
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    .user-info p {
+      font-weight: 600;
+      margin: 5px 0 3px;
+      font-size: 14px;
+    }
+
+    .admin-indicator {
+      display: inline-block;
+      background: #27ae60;
+      color: white;
+      padding: 2px 8px;
+      font-size: 12px;
+      border-radius: 12px;
+      margin-top: 3px;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 30px;
+    }
+
+    .sidebar ul li a {
+      color: white;
+      text-decoration: none;
+      display: block;
+      padding: 12px 15px;
+      border-radius: 6px;
+      transition: background 0.3s, transform 0.2s;
+      font-size: 15px;
+    }
+
+    .sidebar ul li a:hover {
+      background: #34495e;
+      transform: translateX(6px);
+    }
+
+    .main-content {
+      margin-left: 280px;
+      padding: 30px;
+      width: calc(100% - 280px);
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      color: #2980b9;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+/* POS System Layout */
+.pos-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  padding: 20px;
+}
+
+.sales-summary {
+  grid-column: span 3;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.product-management {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+#product-search {
+  width: 100%;
+  max-width: 300px;
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #bdc3c7;
+  border-radius: 5px;
+}
+
+button {
+  width: 100%;
+  max-width: 300px;
+  padding: 12px;
+  font-size: 16px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+
+button:hover {
+  background-color: #2980b9;
+  transform: scale(1.05);
+}
+
+.delete-btn {
+  background-color: #e74c3c;
+}
+
+.delete-btn:hover {
+  background-color: #c0392b;
+}
+
+
+/* Cart Styles */
+.cart,
+.product-management,
+.product-details {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 10px;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cart ul {
+  list-style: none;
+  padding: 0;
+}
+
+.cart ul li {
+  background: #ecf0f1;
+  padding: 12px;
+  border-radius: 5px;
+  margin-top: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cart-item input {
+  width: 50px;
+  text-align: center;
+}
+
+.cart::-webkit-scrollbar {
+  width: 6px;
+}
+
+.cart::-webkit-scrollbar-thumb {
+  background-color: #bdc3c7;
+  border-radius: 3px;
+}
+
+.cart::-webkit-scrollbar-thumb:hover {
+  background-color: #95a5a6;
+}
+
+/* Table */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+  padding: 14px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background: #2980b9;
+  color: white;
+  font-weight: bold;
+}
+
+tr:hover {
+  background: #ecf0f1;
+  transition: background 0.3s;
+}
+
+/* Buttons */
+.remove-btn {
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.remove-btn:hover {
+  background-color: darkred;
+  transform: scale(1.05);
+}
+
+.view-history-btn {
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.view-history-btn:hover {
+  background-color: darkred;
+  transform: scale(1.05);
+}
+
+@media (max-width: 768px) {
+  .pos-container {
+      grid-template-columns: 1fr;
+  }
+  .sales-summary {
+      grid-column: span 1;
+  }
+}
+
+     /* Base modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000; /* High z-index to be on top */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4); /* Semi-transparent black background */
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto; /* Center vertically and horizontally */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Adjust width as needed */
+            max-width: 500px; /* Maximum width */
+            border-radius: 8px;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+            position: relative;
+            animation: slideIn 0.3s ease-out; /* Optional animation */
+        }
+
+        /* Close button */
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .modal-header {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 15px;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.5em;
+            color: #333;
+        }
+
+        .modal-body {
+            padding: 15px 0;
+        }
+
+        .modal-footer {
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: right;
+        }
+
+        .modal-footer button {
+            background-color: #007bff; /* Default button color */
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-left: 10px;
+        }
+
+        .modal-footer button:hover {
+            opacity: 0.9;
+        }
+
+        /* Specific alert/confirm button styles */
+        .modal-footer button.confirm-button {
+            background-color: #28a745; /* Green for confirmation */
+        }
+
+        .modal-footer button.cancel-button {
+            background-color: #dc3545; /* Red for cancellation */
+        }
+
+        .modal-footer button.ok-button {
+            background-color: #007bff; /* Blue for OK */
+        }
+
+        /* Optional slide-in animation */
+        @keyframes slideIn {
+            from {opacity: 0; transform: translateY(-50px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+
+        .styled-dropdown {
+    width: 100%;
+    max-width: 300px;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #bdc3c7;
+    border-radius: 5px;
+    background-color: #fff;
+    color: #333;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    appearance: none;
+    cursor: pointer;
+    transition: border-color 0.3s ease-in-out;
+}
+.styled-dropdown:focus {
+    border-color: #3498db;
+    outline: none;
+}
+</style>
+<body>
+<div class="sidebar">
+  <h1>
+    <a href="{% url 'staff_dashboard' %}" style="text-decoration: none; color: inherit;">
+      Bare Bears<br>Kadayawan
+    </a>
+  </h1>
+  <div class="user-info">
+    <p>Welcome, {{ username }}!</p>
+    <span class="admin-indicator">Staff</span>
+  </div>
+
+  <ul>
+    <li><a href="{% url 'staff_ordering' %}">Ordering</a></li>
+    <li><a href="{% url 'staff_booking' %}">Booking</a></li>
+    <li><a href="{% url 'staff_pos' %}">POS</a></li>
+    
+    
+    <li><a href="{% url 'admin_logout' %}">Logout</a></li>
+  </ul>
+</div>
+
+     <div class="main-content">
+        <h1>Point of Sale (POS)</h1>
+        
+        <div class="pos-container">
+            <div class="product-management">
+                <h3>Manage Products</h3>
+                <select id="product-select" onchange="displaySelectedProduct()" class="styled-dropdown">
+                <option value="">-- Select a Product --</option>
+                </select>
+
+            </div>
+    
+            <div class="product-details">
+                <h3>Product Details</h3>
+                <p>Product ID: <span id="product-id-display"></span></p>
+                <p>Product Name: <span id="product-name-display"></span></p>
+                <p>Price: <span id="product-price-display"></span></p>
+                <button onclick="addToCart()">Add to Cart</button>
+            </div>
+    
+            <div class="cart">
+                <h3>Cart</h3>
+                <ul id="cart-items"></ul>
+                <p>Total Price: <span id="total">0</span></p>
+                <label for="payment-mode">Mode of Payment:</label>
+                <select id="payment-mode">
+                    <option value="Cash">Cash</option>
+                    <option value="Gcash">GCash</option>
+                    
+                </select>
+                <button onclick="checkout()">Checkout</button>
+            </div>
+    
+            <div class="sales-summary">
+                <h3>Sales Summary</h3>
+                <button class="view-history-btn" onclick="viewTransactionHistory()">View Transaction Logs</button>
+                <button class="view-history-btn" onclick="removeAllTransactions()">Close All Transactions</button>
+                <table id="sales-summary-table" border="1">
+                    <thead>
+                        <tr>
+                            <th>Date/Time</th>
+                            <th>Order ID</th>
+                            <th>Product ID</th>
+                            <th>Product Name</th>
+                            <th>Product Price</th> <!-- New column -->
+                            <th>Quantity</th>
+                            <th>Total Price</th>
+                            <th>Payment Mode</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sales-records">
+                        {% for order in pos_orders %}
+      <tr>
+        <td>{{ order.tracking_id }}</td>
+        <td>{{ order.customer_email }}</td>
+        <td>{{ order.total_price }}</td>
+        <td>{{ order.status }}</td>
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="4">No POS transactions found.</td>
+      </tr>
+    {% endfor %}
+                    </tbody>
+                </table>                
+            </div>            
+        </div>
+    </div>
+    {% csrf_token %}
+
+     <div id="alertModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Alert</h3>
+                <span class="close-button" onclick="closeAlertModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="alertMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="ok-button" onclick="closeAlertModal()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Confirm</h3>
+                <span class="close-button" onclick="closeConfirmModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="confirm-button" id="confirmYes">Yes</button>
+                <button type="button" class="cancel-button" onclick="closeConfirmModal()">No</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript functions to control the modals
+        function showAlert(message) {
+            document.getElementById("alertMessage").innerText = message;
+            document.getElementById("alertModal").style.display = "block";
+        }
+
+        function closeAlertModal() {
+            document.getElementById("alertModal").style.display = "none";
+        }
+
+        function showConfirm(message) {
+            document.getElementById("confirmMessage").innerText = message;
+            document.getElementById("confirmModal").style.display = "block";
+            return new Promise((resolve) => {
+                document.getElementById("confirmYes").onclick = () => {
+                    resolve(true);
+                    closeConfirmModal();
+                };
+            });
+        }
+
+        function closeConfirmModal() {
+            document.getElementById("confirmModal").style.display = "none";
+        }
+
+        let products = [];
+        let cart = [];
+
+        function getCSRFToken() {
+            return document.cookie.split('; ')
+                .find(row => row.startsWith('csrftoken='))
+                ?.split('=')[1];
+        }
+
+        fetch('/api/admininventory/')
+            .then(response => response.json())
+            .then(data => {
+                products = data.map(product => ({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price
+                }));
+            })
+            .catch(error => console.error('Error fetching products:', error));
+
+        function searchProduct() {
+            const searchValue = document.getElementById("product-search").value.toLowerCase();
+            const product = products.find(p =>
+                p.id.toString().toLowerCase() === searchValue ||
+                p.name.toLowerCase().includes(searchValue)
+            );
+
+            if (product) {
+                document.getElementById("product-id-display").innerText = product.id;
+                document.getElementById("product-name-display").innerText = product.name;
+                document.getElementById("product-price-display").innerText = product.price;
+            } else {
+                showAlert("Product not found!");
+            }
+        }
+
+
+        function addToCart() {
+            const productId = document.getElementById("product-id-display").innerText;
+            const productName = document.getElementById("product-name-display").innerText;
+            const productPrice = parseFloat(document.getElementById("product-price-display").innerText);
+
+            if (productId) {
+                const existingItem = cart.find(item => item.id === productId);
+                if (existingItem) {
+                    existingItem.quantity++;
+                } else {
+                    cart.push({ id: productId, name: productName, price: productPrice, quantity: 1 });
+                }
+                displayCart();
+            } else {
+                showAlert("No product selected!");
+            }
+        }
+
+        function displayCart() {
+            const cartItems = document.getElementById("cart-items");
+            cartItems.innerHTML = "";
+            let total = 0;
+
+            cart.forEach((item, index) => {
+                total += item.price * item.quantity;
+                cartItems.innerHTML += `
+                    <li>
+                        ${item.name} (${item.id}) - ₱${item.price.toFixed(2)}
+                        <input type="number" min="1" value="${item.quantity}" onchange="updateQuantity(${index}, this.value)">
+                        <button class="remove-btn" onclick="removeItem(${index})">Close</button>
+                    </li>`;
+            });
+
+            document.getElementById("total").innerText = "₱" + total.toFixed(2);
+        }
+
+
+        function updateQuantity(index, value) {
+            cart[index].quantity = parseInt(value);
+            displayCart();
+        }
+
+        function removeItem(index) {
+            cart.splice(index, 1);
+            displayCart();
+        }
+
+        function formatDateTime(date = new Date()) {
+            const now = new Date(date);
+            if (isNaN(now.getTime())) return "Invalid Date";
+
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const year = now.getFullYear();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+
+            return `${month}/${day}/${year} - ${hours}:${minutes}:${seconds}`;
+        }
+
+
+        function checkout() {
+            if (cart.length === 0) {
+                showAlert("Your cart is empty! Add items before checking out.");
+                return;
+            }
+
+            const paymentMode = document.getElementById("payment-mode").value;
+            const transactionId = `TXN-${Date.now()}`;
+            const trackingId = `TRACK-${Date.now()}`;
+            const totalPrice = cart.reduce((total, item) => total + item.price * item.quantity, 0);
+            const currentDateTime = formatDateTime();
+
+            const transactionData = {
+                transaction_id: transactionId,
+                tracking_id: trackingId,
+                payment_mode: paymentMode,
+                total_price: totalPrice.toFixed(2),
+                timestamp: currentDateTime,
+                cart_items: cart.map(item => ({
+                    id: item.id,
+                    name: item.name,
+                    quantity: item.quantity,
+                    price: item.price
+                }))
+            };
+
+            fetch('/api/save-transaction/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: JSON.stringify(transactionData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    showAlert(`Transaction ID: ${transactionId}\nTracking ID: ${trackingId}\nCheckout complete!`);
+                    cart = [];
+                    displayCart();
+                    addTransactionToTable(transactionData);
+                } else {
+                    showAlert("Error saving transaction!");
+                }
+            })
+            .catch(error => {
+                console.error("Error during checkout:", error);
+                showAlert("Error during checkout!");
+            });
+        }
+
+
+        function addTransactionToTable(transaction) {
+            const salesTable = document.getElementById("sales-records");
+
+            const productDetails = transaction.cart_items.map(item => item.id).join("<br>");
+            const productNames = transaction.cart_items.map(item => item.name).join("<br>");
+            const productPrices = transaction.cart_items.map(item => `₱${item.price.toFixed(2)}`).join("<br>");
+            const quantities = transaction.cart_items.map(item => item.quantity).join("<br>");
+            const totalPrice = `₱${parseFloat(transaction.total_price).toFixed(2)}`;
+
+            const newRow = document.createElement("tr");
+            newRow.innerHTML = `
+                <td>${transaction.timestamp}</td>
+                <td>${transaction.transaction_id}</td>
+                <td>${productDetails}</td>
+                <td>${productNames}</td>
+                <td>${productPrices}</td>
+                <td>${quantities}</td>
+                <td>${totalPrice}</td>
+                <td>${transaction.payment_mode}</td>
+                <td>
+                    <button class="remove-btn" onclick="removeTransaction('${transaction.transaction_id}')">Close</button>
+                </td>`;
+
+            salesTable.prepend(newRow);
+        }
+
+
+        function formatBackendDate(dateString) {
+            const date = new Date(dateString);
+            if (isNaN(date)) return dateString;
+            return formatDateTime(date);
+        }
+
+
+        function loadTransactions() {
+            fetch('/api/get-transactions/')
+                .then(response => response.json())
+                .then(data => {
+                    const salesTable = document.getElementById("sales-records");
+                    salesTable.innerHTML = "";
+
+                    data.reverse().forEach(transaction => {
+                        let formattedTimestamp = transaction.timestamp ? formatBackendDate(transaction.timestamp) : "No Date";
+
+                        let productDetails = transaction.items.map(item => `${item.product_id}`).join("<br>");
+                        let productNames = transaction.items.map(item => `${item.product_name}`).join("<br>");
+                        let productPrices = transaction.items.map(item => `₱${parseFloat(item.price).toFixed(2)}`).join("<br>");
+                        let quantities = transaction.items.map(item => `${item.quantity}`).join("<br>");
+                        let totalPrice = `₱${parseFloat(transaction.total_price).toFixed(2)}`;
+
+                        const newRow = document.createElement("tr");
+                        newRow.innerHTML = `
+                            <td>${formattedTimestamp}</td>
+                            <td>${transaction.transaction_id}</td>
+                            <td>${productDetails}</td>
+                            <td>${productNames}</td>
+                            <td>${productPrices}</td> <td>${quantities}</td>
+                            <td>${totalPrice}</td> <td>${transaction.payment_mode}</td>
+                            <td>
+                                <button class="remove-btn" onclick="removeTransaction('${transaction.transaction_id}')">Close</button>
+                            </td>`;
+
+                        salesTable.prepend(newRow);
+                    });
+                })
+                .catch(error => {
+                    console.error("Error fetching transactions:", error);
+                    showAlert("Error loading transaction history!");
+                });
+        }
+
+
+        function removeTransaction(transactionId) {
+            showConfirm("Are you sure you want to close this transaction?")
+                .then((confirmed) => {
+                    if (confirmed) {
+                        fetch(`/api/remove-transaction/${transactionId}/`, {
+                            method: "DELETE",
+                            headers: {
+                                "X-CSRFToken": getCSRFToken()
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log("Delete Response:", data);
+
+                            if (data.success) {
+                                showAlert("Transaction closed successfully!");
+                                loadTransactions();
+                            } else {
+                                showAlert("Failed to close transaction!");
+                            }
+
+                        })
+                        .catch(error => {
+                            console.error("Error removing transaction:", error);
+                            showAlert("Error removing transaction!");
+                        });
+                    }
+                });
+        }
+
+        document.addEventListener("DOMContentLoaded", loadTransactions);
+        document.cookie = "csrftoken={{ csrf_token }}";
+
+        function removeAllTransactions() {
+            showConfirm("Are you sure you want to close all transactions? This action cannot be undone.")
+                .then((confirmed) => {
+                    if (confirmed) {
+                        fetch('/api/remove-all-transactions/', {
+                            method: "DELETE",
+                            headers: {
+                                "X-CSRFToken": getCSRFToken()
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                showAlert("All transactions closed successfully!");
+                                loadTransactions();
+                            } else {
+                                showAlert("Failed to close transactions!");
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Error removing all transactions:", error);
+                            showAlert("Error removing all transactions!");
+                        });
+                    }
+                });
+        }
+
+        function viewTransactionHistory() {
+            window.location.href = "{% url 'staff_pos_history' %}";
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+    fetch('/api/admininventory/')
+        .then(response => response.json())
+        .then(data => {
+            const dropdown = document.getElementById("product-select");
+            data.forEach(product => {
+                const option = document.createElement("option");
+                option.value = JSON.stringify(product);
+                option.textContent = `${product.name} - ₱${product.price}`;
+                dropdown.appendChild(option);
+            });
+        })
+        .catch(error => console.error("Failed to load inventory products:", error));
+});
+
+function displaySelectedProduct() {
+    const selected = document.getElementById("product-select").value;
+    if (!selected) return;
+    const product = JSON.parse(selected);
+    document.getElementById("product-id-display").innerText = product.id;
+    document.getElementById("product-name-display").innerText = product.name;
+    document.getElementById("product-price-display").innerText = product.price;
+}
+
+
+    </script>
+</body>
+</html>

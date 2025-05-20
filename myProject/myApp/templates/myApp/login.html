@@ -1,0 +1,189 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Bare Bears Kadayawan</title>
+  <link rel="stylesheet" href="{% static 'myApp/css/login.css' %}">
+
+  <style>
+    /* Reset some default styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Body styling */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+/* Login container */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Login box styling */
+.login-box {
+  background-color: white;
+  padding: 30px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  width: 300px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-height: 400px; /* Minimum height to prevent overlap */
+  height: auto; /* Allow height to adjust based on content */
+}
+
+/* Title */
+.login-box h2 {
+  margin-bottom: 20px;
+  color: #2c3e50;
+}
+
+/* Divider for "or" */
+.divider {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0;
+}
+
+.divider span {
+  background-color: #f4f4f4;
+  padding: 0 10px;
+  font-size: 14px;
+  color: #7f8c8d;
+}
+
+/* Input fields styling */
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+input[type="password"] {
+  margin-bottom: 20px;
+}
+
+/* Login button */
+.login-btn {
+  background-color: #2c3e50;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.adminlogin-btn {
+  background-color: #2c3e50;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* Social login buttons */
+button {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.google-btn {
+  background-color: #34A853;
+  color: white;
+}
+
+.facebook-btn {
+  background-color: #3b5998;
+  color: white;
+}
+
+/* Sign up link */
+.signup-link p {
+  font-size: 14px;
+  color: #7f8c8d;
+}
+
+.signup-link a {
+  text-decoration: none;
+  color: #2c3e50;
+}
+
+.signup-link a:hover {
+  text-decoration: underline;
+}
+
+/* To ensure buttons are placed at the bottom */
+.login-box form {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  height: 100%;
+}
+
+.divider {
+  margin-top: auto; /* Push the social login buttons to the bottom */
+}
+  </style>
+  
+  <script>
+    function validateForm() {
+      var email = document.getElementById("email").value;
+      var password = document.getElementById("password").value;
+      var loginButton = document.getElementById("login-btn");
+      loginButton.disabled = (email === "" || password === "");
+    }
+
+    function handleSubmit(event) {
+      event.preventDefault(); // Prevent the default form submission
+      document.getElementById("login-form").submit();
+    }
+  </script>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-box">
+      <h2>Login</h2>
+      {% if messages %}
+        <ul class="messages">
+          {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+      <form id="login-form" method="POST" onsubmit="handleSubmit(event)">
+        {% csrf_token %}
+        <input type="email" name="email" id="email" placeholder="Email" required oninput="validateForm()">
+        <input type="password" name="password" id="password" placeholder="Password" required oninput="validateForm()">
+        <button type="submit" id="login-btn" class="login-btn" disabled>Login</button>
+        <div class="divider"><span>or</span></div>
+        <button type="button" class="google-btn">Login with Google</button>
+        <button type="button" class="facebook-btn">Login with Facebook</button>
+        <div class="signup-link">
+          <p>Don't have an account? <a href="{% url 'signup' %}">Sign up</a></p>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

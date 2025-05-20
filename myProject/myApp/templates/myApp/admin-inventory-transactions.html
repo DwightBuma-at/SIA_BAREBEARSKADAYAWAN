@@ -1,0 +1,315 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock-In Transactions</title>
+    <style>
+     body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      background-color: #f4f7f9;
+      color: #333;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: #2c3e50;
+      color: white;
+      padding: 25px 20px;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .sidebar h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 22px;
+      color: #f1c40f;
+      margin: 0;
+      text-align: center;
+      line-height: 1.4;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .user-info {
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    .user-info p {
+      font-weight: 600;
+      margin: 5px 0 3px;
+      font-size: 14px;
+    }
+
+    .admin-indicator {
+      display: inline-block;
+      background: #27ae60;
+      color: white;
+      padding: 2px 8px;
+      font-size: 12px;
+      border-radius: 12px;
+      margin-top: 3px;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 30px;
+    }
+
+    .sidebar ul li a {
+      color: white;
+      text-decoration: none;
+      display: block;
+      padding: 12px 15px;
+      border-radius: 6px;
+      transition: background 0.3s, transform 0.2s;
+      font-size: 15px;
+    }
+
+    .sidebar ul li a:hover {
+      background: #34495e;
+      transform: translateX(6px);
+    }
+
+    .main-content {
+      margin-left: 280px;
+      padding: 30px;
+      width: calc(100% - 280px);
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      color: #2980b9;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+        /* Search Bar */
+        .search-container {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        input[type="text"] {
+            padding: 12px;
+            font-size: 16px;
+            width: 320px;
+            border-radius: 5px;
+            border: 1px solid #bdc3c7;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: #2980b9;
+        }
+
+        /* Table */
+        .transaction-list {
+            background: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #2980b9;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background: #ecf0f1;
+            transition: background 0.3s;
+        }
+
+        /* Buttons */
+        .clear-button {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            font-size: 14px;
+        }
+
+        .clear-button:hover {
+            background: #c0392b;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+     <div class="sidebar">
+  <h1>Bare Bears<br>Kadayawan</h1>
+  <div class="user-info">
+    <p>Dwyt</p> <!-- Placeholder username -->
+    <span class="admin-indicator">Administrator</span>
+  </div>
+
+  <ul>
+    <li><a href="{% url 'admin_inventory' %}">Inventory</a></li>
+  </ul>
+</div>
+    
+    <div class="main-content">
+        <h1>Stock-In Transactions</h1>
+
+        <div class="search-container">
+            <input type="text" id="search-bar" placeholder="Search transactions..." onkeyup="filterTransactions()">
+            <button class="clear-button" onclick="clearSelectedTransactions()">Clear Transactions</button>
+        </div>
+
+        <div class="transaction-list">
+            <table>
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="select-all" onclick="toggleSelectAll()"></th>
+                        <th>Date and Time</th>
+                        <th>Transaction ID</th>
+                        <th>Admin Name</th>
+                        <th>Supplier Name</th>
+                        <th>Product Name</th>
+                        <th>Stocks Added</th>
+                    </tr>
+                </thead>
+                <tbody id="transaction-list">
+                    {% for transaction in transactions %}
+                        <tr>
+                            <td><input type="checkbox" class="transaction-checkbox" data-id="{{ transaction.transaction_id }}"></td>
+                            <td>{{ transaction.date_time|date:"m/d/Y - H:i:s" }}</td>
+                            <td>{{ transaction.transaction_id }}</td>
+                            <td>{{ transaction.admin_name }}</td>
+                            <td>{{ transaction.supplier_name }}</td>
+                            <td>{{ transaction.product_name }}</td>
+                            <td>{{ transaction.stocks_added }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>            
+        </div>
+    </div>
+
+    <script>
+        // Function to toggle select all checkboxes
+        function toggleSelectAll() {
+            const selectAllCheckbox = document.getElementById("select-all");
+            const checkboxes = document.querySelectorAll(".transaction-checkbox");
+
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAllCheckbox.checked;
+            });
+        }
+
+        // Function to clear selected transactions
+        function clearSelectedTransactions() {
+            const checkboxes = document.querySelectorAll('.transaction-checkbox:checked');
+            if (checkboxes.length === 0) {
+                alert("Please select at least one transaction to clear.");
+                return;
+            }
+
+            if (!confirm("Are you sure you want to clear the selected transactions?")) {
+                return;
+            }
+
+            // Get the selected transaction IDs
+            const transactionIds = Array.from(checkboxes).map(checkbox => checkbox.dataset.id);
+
+            // Send the request to the backend
+            fetch('/delete_transactions/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken() // Get CSRF token
+                },
+                body: JSON.stringify({ transaction_ids: transactionIds })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    checkboxes.forEach(checkbox => {
+                        const row = checkbox.closest('tr');
+                        row.remove(); // Remove row from UI
+                    });
+                    alert("Selected transactions have been cleared.");
+                } else {
+                    alert("Error clearing transactions.");
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+
+        // Function to get CSRF Token from cookies
+        function getCSRFToken() {
+            let csrfToken = null;
+            document.cookie.split(';').forEach(cookie => {
+                let [name, value] = cookie.trim().split('=');
+                if (name === 'csrftoken') csrfToken = value;
+            });
+            return csrfToken;
+        }
+
+
+        // Function to filter transactions based on search input
+        function filterTransactions() {
+            const searchQuery = document.getElementById("search-bar").value.toLowerCase();
+            const rows = document.querySelectorAll("table tbody tr");
+
+            rows.forEach(row => {
+                const transactionId = row.cells[1].textContent.toLowerCase();
+                const dateTime = row.cells[2].textContent.toLowerCase();
+                const adminName = row.cells[3].textContent.toLowerCase();
+                const supplierName = row.cells[4].textContent.toLowerCase();
+                const productName = row.cells[5].textContent.toLowerCase();
+                const stocksAdded = row.cells[6].textContent.toLowerCase();
+
+                if (transactionId.includes(searchQuery) || 
+                    dateTime.includes(searchQuery) || 
+                    adminName.includes(searchQuery) || 
+                    supplierName.includes(searchQuery) || 
+                    productName.includes(searchQuery) || 
+                    stocksAdded.includes(searchQuery)) {
+                    row.style.display = "";  
+                } else {
+                    row.style.display = "none";  
+                }
+            });
+        }
+    </script>
+    
+</body>
+</html>

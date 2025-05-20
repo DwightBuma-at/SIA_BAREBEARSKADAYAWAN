@@ -1,0 +1,1139 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Purchasing - Inventory Management</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+       
+ body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      background-color: #f4f7f9;
+      color: #333;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: #2c3e50;
+      color: white;
+      padding: 25px 20px;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .sidebar h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 22px;
+      color: #f1c40f;
+      margin: 0;
+      text-align: center;
+      line-height: 1.4;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .user-info {
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    .user-info p {
+      font-weight: 600;
+      margin: 5px 0 3px;
+      font-size: 14px;
+    }
+
+    .admin-indicator {
+      display: inline-block;
+      background: #27ae60;
+      color: white;
+      padding: 2px 8px;
+      font-size: 12px;
+      border-radius: 12px;
+      margin-top: 3px;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 30px;
+    }
+
+    .sidebar ul li a {
+      color: white;
+      text-decoration: none;
+      display: block;
+      padding: 12px 15px;
+      border-radius: 6px;
+      transition: background 0.3s, transform 0.2s;
+      font-size: 15px;
+    }
+
+    .sidebar ul li a:hover {
+      background: #34495e;
+      transform: translateX(6px);
+    }
+
+    .main-content {
+      margin-left: 280px;
+      padding: 30px;
+      width: calc(100% - 280px);
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      color: #2980b9;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+                /* Table Styling */
+                table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 20px;
+            table-layout: fixed;
+        }
+
+        th, td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            word-wrap: break-word;
+        }
+
+        th {
+            background: #2980b9;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        tr:hover {
+            background: #ecf0f1;
+            transition: background 0.3s;
+        }
+
+
+        /* Style for both dropdowns */
+        .status-dropdown, .payment-status-dropdown {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .status-dropdown:focus, .payment-status-dropdown:focus {
+            border-color: #007bff;
+            outline: none;
+            background-color: #fff;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            border: none;
+            transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+            margin-bottom: 20px;
+            text-decoration: none; /* Remove underline */
+        }
+
+        /* Button Styles */
+        .btn-primary {
+            background: linear-gradient(to right, #3498db, #2980b9);
+            color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(to right, #2980b9, #3498db);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-danger {
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+            color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(to right, #c0392b, #e74c3c);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(to right, #95a5a6, #7f8c8d);
+            color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(to right, #7f8c8d, #95a5a6);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-success:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.6);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 80%;
+                padding: 15px;
+            }
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4); /* Fallback */
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 60%; /* Increased width to make it wider */
+            max-width: 600px; /* Maximum width */
+            height: auto; /* Allow height to adjust based on content */
+            max-height: 400px; /* Limit the height to avoid excessive length */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            overflow-y: auto; /* Add scroll only if content overflows */
+        }
+
+        /* Title Styling */
+        .modal h2 {
+            color: #2980b9;
+            font-size: 20px; /* Slightly smaller heading */
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Form Label and Input Styling */
+        form label {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        form input,
+        form select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 12px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        form input:focus,
+        form select:focus {
+            border-color: #2980b9;
+            outline: none;
+            box-shadow: 0 0 5px rgba(41, 128, 185, 0.6);
+        }
+
+        /* Form Button Styling */
+        form button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            font-size: 14px; /* Slightly smaller button text */
+            font-weight: bold;
+            background: linear-gradient(to right, #27ae60, #2ecc71);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+        }
+
+        form button:hover {
+            background: linear-gradient(to right, #218c53, #27ae60);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        form button:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.6);
+        }
+
+        /* Close Button */
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 80%;
+                padding: 15px;
+                max-height: 350px; /* Adjusted max height for small screens */
+            }
+
+            #purchaseOrderBtn {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+        }
+
+
+
+/* View Details Button Style */
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+}
+.modal-content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 20px;
+    border-radius: 12px;
+    width: 50%;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    animation: fadeIn 0.3s ease-in-out;
+}
+.close-details {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.close-details:hover {
+    color: red;
+}
+#detailsContent p {
+    margin: 8px 0;
+    font-size: 16px;
+    line-height: 1.4;
+}
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+.view-details-btn {
+    background: linear-gradient(to right, #4e73df, #2e59d9);
+    color: white;
+    padding: 12px 25px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 25px;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s ease, transform 0.2s ease-in-out;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.view-details-btn:hover {
+    background: #2e59d9;
+    transform: translateY(-3px); /* Lift effect on hover */
+}
+
+.view-details-btn:active {
+    transform: translateY(1px); /* Pressed effect */
+}
+
+/* View Receipt Button Style */
+.view-receipt-btn {
+    background: linear-gradient(to right, #1cc88a, #17a673);
+    color: white;
+    padding: 12px 25px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 25px;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s ease, transform 0.2s ease-in-out;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.view-receipt-btn:hover {
+    background: #17a673;
+    transform: translateY(-3px); /* Lift effect on hover */
+}
+
+.view-receipt-btn:active {
+    transform: translateY(1px); /* Pressed effect */
+}
+
+/* Optional: Add focus state for accessibility */
+button:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.8);
+}
+
+.return-btn {
+    background: linear-gradient(to right, #e74c3c, #c0392b);
+    color: white;
+    padding: 12px 25px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 25px;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s ease, transform 0.2s ease-in-out;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.return-btn:hover {
+    background: #c0392b;
+    transform: translateY(-3px);
+}
+
+.return-btn:active {
+    transform: translateY(1px);
+}
+
+
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+<div class="sidebar">
+  <h1>
+    <a href="{% url 'admin_dashboard' %}" style="text-decoration: none; color: inherit;">
+      Bare Bears<br>Kadayawan
+    </a>
+  </h1>
+  <div class="user-info">
+    <p>Welcome, {{ username }}!</p>
+    <span class="admin-indicator">Administrator</span>
+  </div>
+
+  <ul>
+    <li><a href="{% url 'admin_ordering' %}">Ordering</a></li>
+    <li><a href="{% url 'admin_booking' %}">Booking</a></li>
+    <li><a href="{% url 'admin_pos' %}">POS</a></li>
+    <li><a href="{% url 'admin_inventory' %}">Inventory</a></li>
+    <li><a href="{% url 'admin_purchasing' %}">Purchasing</a></li>
+    <li><a href="{% url 'admin_logout' %}">Logout</a></li>
+  </ul>
+</div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <h1>Admin Purchasing - Inventory Management</h1>
+
+        <!-- Purchase Order Button -->
+        <button id="purchaseOrderBtn" class="btn btn-primary">Purchase Order</button>
+
+        <!-- Remove Transaction Button -->
+        <button id="removeTransactionBtn" class="btn btn-danger">Remove Transaction</button>
+
+        <!-- Purchase Logs Button -->
+        <a href="{% url 'admin_purchasing_logs' %}" class="btn btn-secondary" style="margin-left: 10px;">Purchase Logs</a>
+
+        <a href="javascript:void(0);" class="btn btn-secondary" onclick="document.getElementById('supplierModal').style.display='block';">Create Supplier Profile</a>
+
+
+
+
+        
+        <!-- Table -->
+        <table>
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="selectAll"></th>
+                    <th>Purchase Date/Time</th>
+                    <th>PO ID</th>
+                    <th>Payment Status</th>
+                    <th>Order Status</th>
+                    <th>Return to Supplier</th> 
+                    <th>View Details</th>
+                    <th>View Receipt</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr></tr>
+                <tr></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal -->
+    <div id="purchaseModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Fill up the Purchase Order</h2>
+            <form method="POST" action="{% url 'admin_purchasing_order' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <label for="supplier">Supplier:</label>
+                <select id="supplier" name="supplier" required>
+  <option value="" disabled selected>Select a supplier</option>
+</select><br><br>
+
+                <label for="contact_person">Contact Person:</label>
+                <input type="text" id="contact_person" name="contact_person" required><br><br>
+
+                <label for="contact_number">Contact Number:</label>
+                <input type="text" id="contact_number" name="contact_number" required><br><br>
+
+                <label for="product_name">Product Name:</label>
+                    <select id="product_name" name="product_name" required>
+                        <option value="" disabled selected>Loading products...</option>
+                    </select><br><br>
+
+
+                <label for="price">Cost Price:</label>
+                <input type="number" id="cost_price" name="cost_price" required><br><br>
+
+                <label for="quantity">Quantity Ordered:</label>
+                <input type="number" id="quantity" name="quantity" required><br><br>
+
+                <label for="total_purchase_cost">Total Purchase Cost:</label>
+                <input type="number" id="total_purchase_cost" name="total_purchase_cost" required><br><br>
+
+                <label for="payment_status">Payment Status:</label>
+                <select id="payment_status" name="payment_status" required>
+                    <option value="Unpaid">Unpaid</option>
+                    <option value="Paid">Paid</option>
+                    <option value="Partial">Partial</option>
+                </select><br><br>
+
+                <label for="payment_method">Payment Method:</label>
+                <select id="payment_method" name="payment_method" required>
+                    <option value="Credit">Credit</option>
+                    <option value="Cash">Cash</option>
+                    <option value="Gcash">Gcash</option>
+                    <option value="Cash on Delivery">Cash on Delivery</option>
+                </select><br><br>
+                
+                <button type="submit" class="btn btn-success">Submit Order</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- View Details Modal -->
+<div id="viewDetailsModal" class="modal">
+    <div class="modal-content">
+        <span class="close-details">&times;</span>
+        <h2>Purchase Order Details</h2>
+        <div id="detailsContent">
+            <!-- Dynamic content will go here -->
+        </div>
+    </div>
+</div>
+
+<div id="returnModal" class="modal">
+  <div class="modal-content">
+    <span class="close-return">&times;</span>
+    <h2>Return to Supplier</h2>
+    <label for="returnQuantity">Quantity to Return:</label>
+    <input type="number" id="returnQuantity" min="1" required>
+    <label for="returnReason">Reason for Return:</label>
+    <textarea id="returnReason" rows="3" required style="width: 100%;"></textarea>
+    <button id="submitReturn" class="btn btn-danger">Submit Return</button>
+  </div>
+</div>
+
+<!-- Create Supplier Modal -->
+<div id="supplierModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="document.getElementById('supplierModal').style.display='none';">&times;</span>
+    <h2>Create Supplier Profile</h2>
+    <form id="supplierForm">
+      {% csrf_token %}
+      <label for="supplier_name">Supplier Name:</label>
+      <input type="text" id="supplier_name" name="supplier" required>
+
+      <label for="supplier_contact">Contact Person:</label>
+      <input type="text" id="supplier_contact" name="contact_person" required>
+
+      <label for="supplier_number">Contact Number:</label>
+      <input type="text" id="supplier_number" name="contact_number" required>
+
+      <button type="submit" class="btn btn-success" style="margin-top: 10px;">Save Supplier</button>
+    </form>
+  </div>
+</div>
+
+
+  <script>
+
+    async function loadSuppliers() {
+    try {
+        const response = await fetch('/api/suppliers/');
+        const data = await response.json();
+        const supplierDropdown = document.getElementById("supplier");
+
+        supplierDropdown.innerHTML = '<option value="" disabled selected>Select a supplier</option>';
+        data.forEach(supplier => {
+            const option = document.createElement("option");
+            option.value = supplier.name;
+            option.dataset.contact = supplier.contact_person;
+            option.dataset.number = supplier.contact_number;
+            option.textContent = supplier.name;
+            supplierDropdown.appendChild(option);
+        });
+
+        supplierDropdown.addEventListener("change", function () {
+            const selected = this.options[this.selectedIndex];
+            document.getElementById("contact_person").value = selected.dataset.contact || "";
+            document.getElementById("contact_number").value = selected.dataset.number || "";
+        });
+    } catch (error) {
+        console.error("Error loading suppliers:", error);
+    }
+}
+
+        // Function to generate a unique PO ID
+        function generatePOID() {
+            var timestamp = new Date().getTime(); // Get current timestamp
+            var randomNum = Math.floor(Math.random() * 1000); // Random number between 0 and 999
+            return `PO${timestamp}${randomNum}`; // Combine timestamp and random number for PO ID
+        }
+
+        // Function to calculate Total Purchase Cost
+        function calculateTotalCost() {
+            var costPrice = document.getElementById('cost_price').value;
+            var quantity = document.getElementById('quantity').value;
+
+            // Ensure both values are numbers and calculate total cost
+            if (costPrice && quantity) {
+                var totalCost = parseFloat(costPrice) * parseInt(quantity);
+                document.getElementById('total_purchase_cost').value = totalCost.toFixed(2);     // Show as a fixed number with two decimal places
+            } else {
+                document.getElementById('total_purchase_cost').value = '';       // Clear total cost if inputs are missing
+            }
+        }
+
+        document.getElementById('selectAll').addEventListener('change', function () {
+            const checked = this.checked;
+            document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = checked);
+        });
+
+
+        // Add event listeners to the cost price and quantity inputs
+        document.getElementById('cost_price').addEventListener('input', calculateTotalCost);
+        document.getElementById('quantity').addEventListener('input', calculateTotalCost);
+
+        // Get modal and button for adding new purchase order
+        var purchaseModal = document.getElementById("purchaseModal");
+        var purchaseBtn = document.getElementById("purchaseOrderBtn");
+        var purchaseCloseSpan = document.querySelector("#purchaseModal .close");
+
+        // When the user clicks the button, open the modal
+        purchaseBtn.onclick = function() {
+            purchaseModal.style.display = "block";
+        }
+
+        // When the user clicks on <span> (x), close the modal
+        purchaseCloseSpan.onclick = function() {
+            purchaseModal.style.display = "none";
+        }
+
+        function getCSRFToken() {
+            return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        }
+
+        // Generic function to show a custom alert modal
+        function showAlert(message) {
+            const alertModal = document.createElement('div');
+            alertModal.classList.add('modal');
+            alertModal.innerHTML = `
+                <div class="modal-content">
+                    <span class="close-alert">&times;</span>
+                    <p>${message}</p>
+                    <button class="btn btn-primary close-alert-btn">Okay</button>
+                </div>
+            `;
+            document.body.appendChild(alertModal);
+            alertModal.style.display = 'block';
+
+            const closeButton = alertModal.querySelector('.close-alert');
+            const okayButton = alertModal.querySelector('.close-alert-btn');
+
+            closeButton.onclick = function() {
+                alertModal.style.display = 'none';
+                document.body.removeChild(alertModal);
+            };
+
+            okayButton.onclick = function() {
+                alertModal.style.display = 'none';
+                document.body.removeChild(alertModal);
+            };
+
+            window.onclick = function(event) {
+                if (event.target === alertModal) {
+                    alertModal.style.display = 'none';
+                    document.body.removeChild(alertModal);
+                }
+            };
+        }
+
+        // Generic function to show a custom confirm modal
+        function showConfirm(message, callback) {
+            const confirmModal = document.createElement('div');
+            confirmModal.classList.add('modal');
+            confirmModal.innerHTML = `
+                <div class="modal-content">
+                    <span class="close-confirm">&times;</span>
+                    <p>${message}</p>
+                    <div style="display: flex; justify-content: flex-end;">
+                        <button class="btn btn-secondary confirm-cancel-btn">Cancel</button>
+                        <button class="btn btn-danger confirm-ok-btn">Okay</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(confirmModal);
+            confirmModal.style.display = 'block';
+
+            const closeButton = confirmModal.querySelector('.close-confirm');
+            const cancelButton = confirmModal.querySelector('.confirm-cancel-btn');
+            const okayButton = confirmModal.querySelector('.confirm-ok-btn');
+
+            closeButton.onclick = function() {
+                confirmModal.style.display = 'none';
+                document.body.removeChild(confirmModal);
+            };
+
+            cancelButton.onclick = function() {
+                confirmModal.style.display = 'none';
+                document.body.removeChild(confirmModal);
+            };
+
+            okayButton.onclick = function() {
+                confirmModal.style.display = 'none';
+                document.body.removeChild(confirmModal);
+                callback(); // Execute the callback function if Okay is clicked
+            };
+
+            window.onclick = function(event) {
+                if (event.target === confirmModal) {
+                    confirmModal.style.display = 'none';
+                    document.body.removeChild(confirmModal);
+                }
+            };
+        }
+
+        // Function to handle payment status change and send update request (AJAX)
+        async function handlePaymentStatusChange(orderId, newPaymentStatus) {
+            try {
+                const response = await fetch(`{% url 'admin_purchasing_update_payment_status' order_id=0 %}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCSRFToken()
+                    },
+                    body: JSON.stringify({ order_id: orderId, payment_status: newPaymentStatus })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Payment status updated:', data);
+                    // Optionally, provide visual feedback to the user
+                } else {
+                    console.error('Failed to update payment status:', response.status);
+                    showAlert('Failed to update payment status.');
+                }
+            } catch (error) {
+                console.error('Error updating payment status:', error);
+                showAlert('Error updating payment status.');
+            }
+        }
+
+        // Function to fetch existing purchase orders (AJAX)
+        async function fetchPurchaseOrders() {
+            try {
+                const response = await fetch("{% url 'admin_purchasing_list_json' %}"); // URL to fetch orders as JSON
+                const data = await response.json();
+                const tbody = document.querySelector('table tbody');
+                tbody.innerHTML = ''; // Clear existing rows
+
+                data.forEach(order => {
+                    const row = tbody.insertRow();
+                    const isFinal = order.payment_status === 'Paid' && order.order_status === 'Completed';
+                    row.innerHTML = `
+                        <td><input type="checkbox" class="row-checkbox" data-id="${order.id}"></td>
+                        <td>${new Date(order.purchase_datetime).toLocaleString()}</td>
+                        <td>${order.po_id}</td>
+                        <td>
+                            <select class="payment-status-dropdown" ${isFinal ? 'disabled' : ''} onchange="handlePaymentStatusChange(${order.id}, this.value)">
+                                <option value="Unpaid" ${order.payment_status === 'Unpaid' ? 'selected' : ''}>Unpaid</option>
+                                <option value="Paid" ${order.payment_status === 'Paid' ? 'selected' : ''}>Paid</option>
+                                <option value="Partial" ${order.payment_status === 'Partial' ? 'selected' : ''}>Partial</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select class="status-dropdown" ${isFinal ? 'disabled' : ''} onchange="updateOrderStatus(${order.id}, this.value)">
+                                <option value="Unclaimed" ${order.order_status === 'Unclaimed' ? 'selected' : ''}>Unclaimed</option>
+                                <option value="Delivered" ${order.order_status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                                <option value="Cancelled" ${order.order_status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                                <option value="Checking" ${order.order_status === 'Checking' ? 'selected' : ''}>Checking</option>
+                                <option value="Completed" ${order.order_status === 'Completed' ? 'selected' : ''}>Completed</option>
+                            </select>
+                        </td>
+                        <td>
+                            <button class="return-btn" ${isFinal ? 'disabled style="opacity: 0.6; cursor: not-allowed;"' : ''} data-order='${JSON.stringify(order)}'>Return</button>
+                        </td>
+
+                        <td><button class="view-details-btn" data-order='${JSON.stringify(order)}'>View Details</button></td>
+                        <td><button class="view-receipt-btn" data-order='${JSON.stringify(order)}'>View Receipt</button></td>
+                    `;
+                    // ... rest of the row creation
+                });
+
+                // Add event listeners for the dynamically created "View Details" buttons
+                document.querySelectorAll('.view-details-btn').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const order = JSON.parse(this.dataset.order);
+                        const viewDetailsModal = document.getElementById('viewDetailsModal');
+                        const detailsContent = document.getElementById('detailsContent');
+                        const closeDetails = document.querySelector('.close-details');
+
+                        detailsContent.innerHTML = `
+                            <p><strong>Supplier:</strong> ${order.supplier}</p>
+                            <p><strong>Contact Person:</strong> ${order.contact_person}</p>
+                            <p><strong>Contact Number:</strong> ${order.contact_number}</p>
+                            <p><strong>Product Name:</strong> ${order.product_name}</p>
+                            <p><strong>Cost Price:</strong> ₱${parseFloat(order.cost_price).toFixed(2)}</p>
+                            <p><strong>Ordered Quantity:</strong> ${order.quantity_ordered}</p>
+                            <p><strong>Total Purchase Cost:</strong> ₱${parseFloat(order.total_purchase_cost).toFixed(2)}</p>
+                            <p><strong>Payment Method:</strong> ${order.payment_method}</p>
+                            <p><strong>Payment Status:</strong> ${order.payment_status}</p>
+                            <p><strong>Order Status:</strong> ${order.order_status}</p>
+                        `;
+
+                        viewDetailsModal.style.display = 'block';
+
+                        closeDetails.onclick = function() {
+                            viewDetailsModal.style.display = 'none';
+                        }
+                        window.onclick = function(event) {
+                            if (event.target === viewDetailsModal) {
+                                viewDetailsModal.style.display = 'none';
+                            }
+                        }
+                    });
+                });
+
+                document.querySelectorAll('.return-btn').forEach(button => {
+                    button.addEventListener('click', function () {
+                        const order = JSON.parse(this.dataset.order);
+                        const modal = document.getElementById('returnModal');
+                        const closeBtn = document.querySelector('.close-return');
+
+                        modal.style.display = 'block';
+                        document.getElementById('returnQuantity').value = '';
+                        document.getElementById('returnReason').value = '';
+                        modal.dataset.orderId = order.id;
+                        modal.dataset.unitPrice = parseFloat(order.cost_price);
+                        modal.dataset.originalQty = parseInt(order.quantity_ordered);
+
+                        closeBtn.onclick = () => modal.style.display = 'none';
+                        window.onclick = (e) => {
+                            if (e.target == modal) modal.style.display = 'none';
+                        };
+                    });
+                });
+
+                document.getElementById('submitReturn').addEventListener('click', async function () {
+                    const modal = document.getElementById('returnModal');
+                    const returnQty = parseInt(document.getElementById('returnQuantity').value);
+                    const reason = document.getElementById('returnReason').value.trim();
+                    const orderId = modal.dataset.orderId;
+                    const originalQty = parseInt(modal.dataset.originalQty);
+                    const unitPrice = parseFloat(modal.dataset.unitPrice);
+
+                    if (!returnQty || returnQty <= 0 || returnQty > originalQty) {
+                        showAlert("Enter a valid return quantity.");
+                        return;
+                    }
+                    if (!reason) {
+                        showAlert("Please provide a reason for return.");
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(`/api/return_order/${orderId}/`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCSRFToken()
+                            },
+                            body: JSON.stringify({
+                                return_quantity: returnQty,
+                                reason: reason
+                            })
+                        });
+
+                        const data = await response.json();
+                        if (response.ok) {
+                            modal.style.display = 'none';
+                            showAlert("Return submitted successfully.");
+                            fetchPurchaseOrders();  // refresh updated data
+                        } else {
+                            showAlert(data.error || "Return failed.");
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        showAlert("Error occurred while submitting return.");
+                    }
+                });
+
+                // Add event listeners for the dynamically created "View Receipt" buttons
+                document.querySelectorAll('.view-receipt-btn').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const order = JSON.parse(this.dataset.order);
+                        const paymentStatus = order.payment_status;
+                        const orderStatus = order.order_status;
+                        const poID = order.po_id;
+                        const formattedDate = new Date(order.purchase_datetime).toLocaleString();
+
+                        if (paymentStatus === "Paid" && orderStatus === "Completed") {
+                            const { jsPDF } = window.jspdf;
+                            var doc = new jsPDF();
+                            doc.setFont("helvetica", "normal");
+                            doc.setFontSize(16);
+                            doc.text("Bare Bears Kadayawan", 10, 10);
+                            doc.setFontSize(12);
+                            doc.text(`Purchase Order Receipt - PO ID: ${poID}`, 10, 20);
+                            doc.text(`Purchase Date/Time: ${formattedDate}`, 10, 30);
+                            doc.text(`Processed By: {{ username }}`, 10, 40); // 👈 Add this line
+                            doc.text(`Supplier: ${order.supplier}`, 10, 50);
+                            doc.text(`Contact Person: ${order.contact_person}`, 10, 60);
+                            doc.text(`Contact Number: ${order.contact_number}`, 10, 70);
+                            doc.text(`Product Name: ${order.product_name}`, 10, 80);
+                            doc.text(`Cost Price: ₱${parseFloat(order.cost_price).toFixed(2)}`, 10, 90);
+                            doc.text(`Ordered Quantity: ${order.quantity_ordered}`, 10, 100);
+                            doc.text(`Total Purchase Cost: ₱${parseFloat(order.total_purchase_cost).toFixed(2)}`, 10, 110);
+                            doc.text(`Payment Method: ${order.payment_method}`, 10, 120);
+                            doc.setFontSize(10);
+                            doc.text("Thank you for your purchase!", 10, 130);
+                            doc.save(`${poID}_receipt.pdf`);
+                        } else {
+                            showAlert("Payment must be 'Paid' and Order Status must be 'Completed' to generate a receipt.");
+                        }
+                    });
+                });
+
+            } catch (error) {
+                console.error("Error fetching purchase orders:", error);
+                showAlert("Error fetching purchase orders.");
+            }
+        }
+
+        // Function to update the order status via AJAX
+        async function updateOrderStatus(orderId, newStatus) {
+            try {
+                const response = await fetch(`{% url 'admin_purchasing_update_status' order_id=0 %}`, { // URL to update status
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCSRFToken()
+                    },
+                    body: JSON.stringify({ order_id: orderId, order_status: newStatus })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.updated_stock !== undefined) {
+                        showAlert(`${data.message}`);
+                    } else {
+                        showAlert(`${data.message}`);
+                    }
+
+                    // Optionally, provide visual feedback to the user
+                } else {
+                    console.error('Failed to update status:', response.status);
+                    showAlert('Failed to update order status.');
+                }
+            } catch (error) {
+                console.error('Error updating status:', error);
+                showAlert('Error updating order status.');
+            }
+        }
+
+        // Handle form submission for new purchase order (AJAX)
+        document.querySelector('form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const formData = new FormData(this);
+
+            try {
+                const response = await fetch("{% url 'admin_purchasing_order' %}", {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': getCSRFToken()
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Order submitted successfully:', data);
+                    purchaseModal.style.display = "none";
+                    this.reset();
+                    fetchPurchaseOrders(); // Reload the purchase order list
+                } else {
+                    console.error('Error submitting order:', response.status);
+                    showAlert('Error submitting purchase order.');
+                }
+            } catch (error) {
+                console.error('Error submitting order:', error);
+                showAlert('An error occurred while submitting the order.');
+            }
+        });
+
+        // Fetch existing orders when the page loads
+        document.addEventListener('DOMContentLoaded', fetchPurchaseOrders);
+
+        // Function to handle removing transactions via AJAX
+        document.getElementById("removeTransactionBtn").addEventListener("click", async function () {
+            const checkboxes = document.querySelectorAll(".row-checkbox:checked");
+            const idsToDelete = Array.from(checkboxes).map(cb => cb.dataset.id);
+
+            if (idsToDelete.length === 0) {
+                showAlert("Please select at least one transaction to remove.");
+                return;
+            }
+
+            showConfirm("Are you sure you want to remove the selected transactions?", async () => {
+                try {
+                    const response = await fetch("{% url 'admin_purchasing_delete_transactions' %}", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRFToken": getCSRFToken()
+                        },
+                        body: JSON.stringify({ ids: idsToDelete })
+                    });
+
+                    if (response.ok) {
+                        showAlert("Transaction(s) removed successfully.");
+                        fetchPurchaseOrders(); // Reload the purchase order list using AJAX
+                    } else {
+                        showAlert("Failed to remove transactions.");
+                    }
+                } catch (error) {
+                    console.error("Error removing transactions:", error);
+                    showAlert("An error occurred while removing transactions.");
+                }
+            });
+        });
+
+        async function loadInventoryProducts() {
+        try {
+            const response = await fetch("/api/admininventory/");
+            const data = await response.json();
+            const dropdown = document.getElementById("product_name");
+            dropdown.innerHTML = '<option value="" disabled selected>Select a product</option>';
+            data.forEach(product => {
+                const option = document.createElement("option");
+                option.value = product.name;
+                option.textContent = product.name;
+                dropdown.appendChild(option);
+            });
+        } catch (error) {
+            console.error("Error loading inventory products:", error);
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("purchaseOrderBtn").addEventListener("click", () => {
+            loadInventoryProducts();
+            loadSuppliers(); // 👈 add this
+        });
+
+    });
+
+    document.getElementById("supplierForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const name = document.getElementById("supplier_name").value;
+    const contact = document.getElementById("supplier_contact").value;
+    const number = document.getElementById("supplier_number").value;
+
+    try {
+        const response = await fetch('/api/suppliers/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
+            },
+            body: JSON.stringify({
+                name: name,
+                contact_person: contact,
+                contact_number: number
+            })
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            showAlert("Supplier saved successfully.");
+            document.getElementById("supplierModal").style.display = "none";
+            this.reset();
+            loadSuppliers(); // reload updated supplier list
+        } else {
+            showAlert(result.error || "Failed to save supplier.");
+        }
+    } catch (error) {
+        console.error("Error saving supplier:", error);
+        showAlert("Error occurred while saving supplier.");
+    }
+});
+
+    </script>
+       
+</body>
+</html>

@@ -1,0 +1,328 @@
+{% load static %}
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS Transaction History</title>
+    <link rel="stylesheet" href="{% static 'myApp/css/admin-pos-history.css' %}">
+    <style>
+        /* General Page Styles */
+        body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      background-color: #f4f7f9;
+      color: #333;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: #2c3e50;
+      color: white;
+      padding: 25px 20px;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .sidebar h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 22px;
+      color: #f1c40f;
+      margin: 0;
+      text-align: center;
+      line-height: 1.4;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .user-info {
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    .user-info p {
+      font-weight: 600;
+      margin: 5px 0 3px;
+      font-size: 14px;
+    }
+
+    .admin-indicator {
+      display: inline-block;
+      background: #27ae60;
+      color: white;
+      padding: 2px 8px;
+      font-size: 12px;
+      border-radius: 12px;
+      margin-top: 3px;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 30px;
+    }
+
+    .sidebar ul li a {
+      color: white;
+      text-decoration: none;
+      display: block;
+      padding: 12px 15px;
+      border-radius: 6px;
+      transition: background 0.3s, transform 0.2s;
+      font-size: 15px;
+    }
+
+    .sidebar ul li a:hover {
+      background: #34495e;
+      transform: translateX(6px);
+    }
+
+    .main-content {
+      margin-left: 280px;
+      padding: 30px;
+      width: calc(100% - 280px);
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      color: #2980b9;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 14px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #2980b9;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background: #ecf0f1;
+            transition: background 0.3s;
+        }
+
+        /* Buttons */
+        #clear-transactions {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 14px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        #clear-transactions:hover {
+            background-color: #c0392b;
+            transform: scale(1.05);
+        }
+
+        .view-history-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 14px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .view-history-btn:hover {
+            background-color: #c0392b;
+            transform: scale(1.05);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 220px;
+            }
+            
+            .main-content {
+                margin-left: 240px;
+                padding: 20px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+     <div class="sidebar">
+  <h1>Bare Bears<br>Kadayawan</h1>
+  <div class="user-info">
+    <p>Welcome, {{ username }}!</p>
+    <span class="admin-indicator">Staff</span>
+  </div>
+
+  <ul>
+    <li><a href="{% url 'staff_pos' %}">POS</a></li>
+  </ul>
+</div>
+    
+    <div class="main-content">
+        <h1>Transaction History</h1>
+        
+        <!-- Clear Transactions Button at the Top -->
+        <button id="clear-transactions">Clear Transactions</button>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Date/Time Checkout</th>
+                    <th>Order ID</th>
+                    <th>Product ID</th>
+                    <th>Product Name</th>
+                    <th>Product Price</th>
+                    <th>Quantity</th>
+                    <th>Total Price</th>
+                    <th>Payment Mode</th>
+                </tr>
+            </thead>
+            <tbody id="history-table-body">
+                <!-- Removed transactions will be loaded here -->
+            </tbody>
+        </table>
+        
+        <script>
+
+function formatDateTime(dateString) {
+    const date = new Date(dateString);
+    if (isNaN(date)) return dateString; // If invalid, return original string
+
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    return `${month}/${day}/${year} - ${hours}:${minutes}:${seconds}`;
+}
+
+
+async function fetchRemovedTransactions() {
+    const response = await fetch('/api/removed-transactions/');
+    const data = await response.json();
+    
+    const historyTable = document.getElementById('history-table-body');
+    historyTable.innerHTML = ''; // Clear table before adding new data
+
+    // Group transactions by original_transaction_id
+    const groupedTransactions = data.transactions.reduce((acc, transaction) => {
+        if (!acc[transaction.original_transaction_id]) {
+            acc[transaction.original_transaction_id] = {
+                ...transaction, // Copy the first transaction to group
+                cart_items: [] // Initialize an empty array to store cart items
+            };
+        }
+        acc[transaction.original_transaction_id].cart_items.push(transaction);
+        return acc;
+    }, {});
+
+    // Convert groupedTransactions to an array and sort by date_removed (most recent first)
+    const sortedTransactions = Object.values(groupedTransactions).sort((a, b) => {
+        const dateA = new Date(a.date_removed); // Use date_removed for sorting
+        const dateB = new Date(b.date_removed);
+        return dateB - dateA; // Sort in descending order (latest removed first)
+    });
+
+    // Now, we iterate through each sorted transaction
+    sortedTransactions.forEach(transaction => {
+        // Extract and join product details for the same transaction, separating by line breaks
+        const productDetails = transaction.cart_items.map(item => item.product_id).join("<br>");
+        const productNames = transaction.cart_items.map(item => item.product_name).join("<br>");
+        
+        // Format product prices with ₱ symbol and two decimal points
+        const productPrices = transaction.cart_items.map(item => `₱${parseFloat(item.product_price).toFixed(2)}`).join("<br>");
+        
+        const quantities = transaction.cart_items.map(item => item.quantity).join("<br>");
+        
+        // Fix the total price: sum of (price * quantity) for each item
+        const totalPrice = transaction.cart_items.reduce((sum, item) => {
+            return sum + (parseFloat(item.product_price) * item.quantity); // Multiply price by quantity
+        }, 0);
+
+        // Format the total price with ₱ symbol and two decimal points
+        const formattedTotalPrice = `₱${totalPrice.toFixed(2)}`;
+
+        const row = `<tr>
+            <td>${formatDateTime(transaction.date_time)}</td>
+            <td>${transaction.original_transaction_id}</td>
+            <td>${productDetails}</td>
+            <td>${productNames}</td>
+            <td>${productPrices}</td> <!-- Formatted product prices with ₱ -->
+            <td>${quantities}</td>
+            <td>${formattedTotalPrice}</td> <!-- Display total price with ₱ symbol -->
+            <td>${transaction.payment_mode}</td>
+        </tr>`;
+        historyTable.innerHTML += row;
+    });
+}
+
+// Load removed transactions when the page loads
+fetchRemovedTransactions();
+
+
+            function getCSRFToken() {
+        return document.cookie.split('; ')
+            .find(row => row.startsWith('csrftoken='))
+            ?.split('=')[1];
+    }
+
+    async function clearTransactions() {
+        if (confirm("Are you sure you want to clear all transactions?")) {
+            try {
+                const response = await fetch('/api/clear-removed-transactions/', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCSRFToken() // Include CSRF Token
+                    }
+                });
+
+                const data = await response.json();
+                alert(data.message); // Show a confirmation message
+
+                if (data.success) {
+                    document.getElementById('history-table-body').innerHTML = ''; // Clear table in frontend
+                }
+            } catch (error) {
+                console.error("Error clearing transactions:", error);
+                alert("Failed to clear transactions.");
+            }
+        }
+    }
+
+    // Attach event listener to button
+    document.getElementById('clear-transactions').addEventListener('click', clearTransactions);
+        </script>
+        
+</body>
+</html>

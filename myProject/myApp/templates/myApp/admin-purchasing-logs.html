@@ -1,0 +1,504 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Purchasing - Inventory Management</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+       body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      background-color: #f4f7f9;
+      color: #333;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: #2c3e50;
+      color: white;
+      padding: 25px 20px;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .sidebar h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 22px;
+      color: #f1c40f;
+      margin: 0;
+      text-align: center;
+      line-height: 1.4;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .user-info {
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    .user-info p {
+      font-weight: 600;
+      margin: 5px 0 3px;
+      font-size: 14px;
+    }
+
+    .admin-indicator {
+      display: inline-block;
+      background: #27ae60;
+      color: white;
+      padding: 2px 8px;
+      font-size: 12px;
+      border-radius: 12px;
+      margin-top: 3px;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 30px;
+    }
+
+    .sidebar ul li a {
+      color: white;
+      text-decoration: none;
+      display: block;
+      padding: 12px 15px;
+      border-radius: 6px;
+      transition: background 0.3s, transform 0.2s;
+      font-size: 15px;
+    }
+
+    .sidebar ul li a:hover {
+      background: #34495e;
+      transform: translateX(6px);
+    }
+
+    .main-content {
+      margin-left: 280px;
+      padding: 30px;
+      width: calc(100% - 280px);
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      color: #2980b9;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+                /* Table Styling */
+                table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 20px;
+            table-layout: fixed;
+        }
+
+        th, td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            word-wrap: break-word;
+        }
+
+        th {
+            background: #2980b9;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        tr:hover {
+            background: #ecf0f1;
+            transition: background 0.3s;
+        }
+
+
+        /* Style for both dropdowns */
+        .status-dropdown, .payment-status-dropdown {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .status-dropdown:focus, .payment-status-dropdown:focus {
+            border-color: #007bff;
+            outline: none;
+            background-color: #fff;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            border: none;
+            transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+            margin-bottom: 20px;
+            text-decoration: none; /* Remove underline */
+        }
+
+        .btn-success {
+            background: linear-gradient(to right, #27ae60, #2ecc71);
+            color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(to right, #218c53, #27ae60);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-success:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.6);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 80%;
+                padding: 15px;
+            }
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4); /* Fallback */
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 60%; /* Increased width to make it wider */
+            max-width: 600px; /* Maximum width */
+            height: auto; /* Allow height to adjust based on content */
+            max-height: 400px; /* Limit the height to avoid excessive length */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            overflow-y: auto; /* Add scroll only if content overflows */
+        }
+
+        /* Title Styling */
+        .modal h2 {
+            color: #2980b9;
+            font-size: 20px; /* Slightly smaller heading */
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Form Label and Input Styling */
+        form label {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        form input,
+        form select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 12px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        form input:focus,
+        form select:focus {
+            border-color: #2980b9;
+            outline: none;
+            box-shadow: 0 0 5px rgba(41, 128, 185, 0.6);
+        }
+
+        /* Form Button Styling */
+        form button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            font-size: 14px; /* Slightly smaller button text */
+            font-weight: bold;
+            background: linear-gradient(to right, #27ae60, #2ecc71);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+        }
+
+        form button:hover {
+            background: linear-gradient(to right, #218c53, #27ae60);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        form button:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.6);
+        }
+
+        /* Close Button */
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 80%;
+                padding: 15px;
+                max-height: 350px; /* Adjusted max height for small screens */
+            }
+
+            #purchaseOrderBtn {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+        }
+
+/* View Details Button Style */
+.view-details-btn {
+    background: linear-gradient(to right, #4e73df, #2e59d9);
+    color: white;
+    padding: 12px 25px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 25px;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s ease, transform 0.2s ease-in-out;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.view-details-btn:hover {
+    background: #2e59d9;
+    transform: translateY(-3px); /* Lift effect on hover */
+}
+
+.view-details-btn:active {
+    transform: translateY(1px); /* Pressed effect */
+}
+
+/* View Receipt Button Style */
+.view-receipt-btn {
+    background: linear-gradient(to right, #1cc88a, #17a673);
+    color: white;
+    padding: 12px 25px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 25px;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s ease, transform 0.2s ease-in-out;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.view-receipt-btn:hover {
+    background: #17a673;
+    transform: translateY(-3px); /* Lift effect on hover */
+}
+
+.view-receipt-btn:active {
+    transform: translateY(1px); /* Pressed effect */
+}
+
+/* Optional: Add focus state for accessibility */
+button:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.8);
+}
+
+    </style>
+</head>
+<body>
+
+     <!-- Sidebar -->
+    <div class="sidebar">
+  <h1>Bare Bears<br>Kadayawan</h1>
+  <div class="user-info">
+    <p>Welcome, {{ username }}!</p>
+    <span class="admin-indicator">Administrator</span>
+  </div>
+
+  <ul>
+    <li><a href="{% url 'admin_purchasing' %}">Purchasing</a></li>
+  </ul>
+</div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <h1>Purchasing Transaction Logs</h1>
+
+    <button class="btn btn-success" onclick="clearTransactions()">Clear Transaction</button>
+
+
+        <!-- Table -->
+        <table>
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="selectAll"></th>
+                    <th>Purchase Date/Time</th>
+                    <th>PO ID</th>
+                    <th>Payment Status</th>
+                    <th>Order Status</th>
+                    <th>View Details</th>
+                    <th>View Receipt</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                    <tr>
+                        <td><input type="checkbox" class="row-checkbox"></td>
+                        <td>{{ log.purchase_datetime|date:"M d, Y h:i A" }}</td>
+                        <td>{{ log.po_id }}</td>
+                        <td>{{ log.payment_status }}</td>
+                        <td>{{ log.order_status }}</td>
+                        <td>
+                            <button class="view-details-btn" onclick='showDetails({ 
+                                "po_id": "{{ log.po_id }}",
+                                "purchase_datetime": "{{ log.purchase_datetime|date:"Y-m-d\\TH:i:s" }}",
+                                "supplier": "{{ log.supplier }}",
+                                "contact_person": "{{ log.contact_person }}",
+                                "contact_number": "{{ log.contact_number }}",
+                                "product_name": "{{ log.product_name }}",
+                                "cost_price": "{{ log.cost_price }}",
+                                "quantity_ordered": "{{ log.quantity_ordered }}",
+                                "total_purchase_cost": "{{ log.total_purchase_cost }}",
+                                "payment_status": "{{ log.payment_status }}",
+                                "payment_method": "{{ log.payment_method }}",
+                                "order_status": "{{ log.order_status }}"
+                            })'>View Details</button>
+                            
+                        </td>
+                        <td>
+                            {% if log.payment_status == "Paid" and log.order_status == "Completed" %}
+                            <button class="view-receipt-btn" onclick='generateReceipt({ 
+                                "po_id": "{{ log.po_id }}",
+                                "purchase_datetime": "{{ log.purchase_datetime|date:"Y-m-d\\TH:i:s" }}",
+                                "supplier": "{{ log.supplier }}",
+                                "contact_person": "{{ log.contact_person }}",
+                                "contact_number": "{{ log.contact_number }}",
+                                "product_name": "{{ log.product_name }}",
+                                "cost_price": "{{ log.cost_price }}",
+                                "quantity_ordered": "{{ log.quantity_ordered }}",
+                                "total_purchase_cost": "{{ log.total_purchase_cost }}",
+                                "payment_status": "{{ log.payment_status }}",
+                                "payment_method": "{{ log.payment_method }}",
+                                "order_status": "{{ log.order_status }}"
+                            })'>View Receipt</button>
+                            
+                            {% else %}
+                            <span style="color: gray;">N/A</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="7">No logs found.</td></tr>
+                {% endfor %}
+                </tbody>
+                
+        </table>
+    </div>
+
+  <script>
+
+    document.getElementById('selectAll').addEventListener('click', function() {
+    const checkboxes = document.querySelectorAll('.row-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = this.checked;
+    });
+});
+    function clearTransactions() {
+    if (confirm("Are you sure you want to clear all transactions?")) {
+        // Perform the action to clear transactions (e.g., make an API call or remove from the database)
+        alert("Transactions cleared successfully!");
+    }
+}
+
+function showDetails(log) {
+    alert(`
+Supplier: ${log.supplier}
+Contact Person: ${log.contact_person}
+Contact Number: ${log.contact_number}
+Product Name: ${log.product_name}
+Cost Price: ₱${parseFloat(log.cost_price).toFixed(2)}
+Quantity Ordered: ${log.quantity_ordered}
+Total Purchase Cost: ₱${parseFloat(log.total_purchase_cost).toFixed(2)}
+Payment Method: ${log.payment_method}
+Payment Status: ${log.payment_status}
+Order Status: ${log.order_status}
+    `);
+}
+
+function generateReceipt(log) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(16);
+    doc.text("Bare Bears Kadayawan", 10, 10);
+    doc.setFontSize(12);
+    doc.text(`Purchase Order Receipt - PO ID: ${log.po_id}`, 10, 20);
+    doc.text(`Purchase Date/Time: ${new Date(log.purchase_datetime).toLocaleString()}`, 10, 30);
+    doc.text(`Supplier: ${log.supplier}`, 10, 40);
+    doc.text(`Contact Person: ${log.contact_person}`, 10, 50);
+    doc.text(`Contact Number: ${log.contact_number}`, 10, 60);
+    doc.text(`Product Name: ${log.product_name}`, 10, 70);
+    doc.text(`Cost Price: ₱${parseFloat(log.cost_price).toFixed(2)}`, 10, 80);
+    doc.text(`Ordered Quantity: ${log.quantity_ordered}`, 10, 90);
+    doc.text(`Total Purchase Cost: ₱${parseFloat(log.total_purchase_cost).toFixed(2)}`, 10, 100);
+    doc.text(`Payment Method: ${log.payment_method}`, 10, 110);
+    doc.setFontSize(10);
+    doc.text("This is a removed transaction log copy.", 10, 120);
+    doc.save(`${log.po_id}_receipt.pdf`);
+}
+</script>
+
+    
+</body>
+</html>

@@ -1,0 +1,453 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Tracking</title>
+    <style>
+        /* Global Styles */
+       body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      background-color: #f4f7f9;
+      color: #333;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: #2c3e50;
+      color: white;
+      padding: 25px 20px;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .sidebar h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 22px;
+      color: #f1c40f;
+      margin: 0;
+      text-align: center;
+      line-height: 1.4;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .user-info {
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    .user-info p {
+      font-weight: 600;
+      margin: 5px 0 3px;
+      font-size: 14px;
+      color: white; /* <-- add this line */
+    }
+
+    .user-indicator {
+      display: inline-block;
+      background: #27ae60;
+      color: white;
+      padding: 2px 8px;
+      font-size: 12px;
+      border-radius: 12px;
+      margin-top: 3px;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 30px;
+    }
+
+    .sidebar ul li a {
+      color: white;
+      text-decoration: none;
+      display: block;
+      padding: 12px 15px;
+      border-radius: 6px;
+      transition: background 0.3s, transform 0.2s;
+      font-size: 15px;
+    }
+
+    .sidebar ul li a:hover {
+      background: #34495e;
+      transform: translateX(6px);
+    }
+
+    .main-content {
+      margin-left: 280px;
+      padding: 30px;
+      width: calc(100% - 280px);
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      color: #2980b9;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+        /* Search Bar */
+        .order-controls {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #searchOrder {
+            width: 100%;
+            max-width: 320px;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        #searchOrder:focus {
+            border-color: #2980b9;
+        }
+
+        /* Order Table */
+        .transaction-list {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #2980b9;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        tr:hover {
+            background: #ecf0f1;
+            transition: background 0.3s;
+        }
+
+        /* Status Labels */
+        .status {
+            padding: 6px 12px;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .status.pending {
+            background: #f39c12;
+            color: white;
+        }
+
+        .status.confirmed {
+            background: #27ae60;
+            color: white;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 10px 14px;
+            font-size: 14px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            text-align: center;
+            border: none;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+
+        .btn-success {
+            background-color: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #218c53;
+        }
+
+        .btn-warning {
+            background-color: #f39c12;
+            color: white;
+            text-decoration: none; 
+        }
+
+        .btn-warning:hover {
+            background-color: #d68910;
+        }
+
+        /* Empty Order Alert */
+        .empty-alert {
+            display: none;
+            text-align: center;
+            color: #555;
+            font-size: 16px;
+            margin-top: 20px;
+            padding: 12px;
+            background: #ffe8e8;
+            border: 1px solid #ff4d4d;
+            border-radius: 6px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 220px;
+            }
+
+            .main-content {
+                margin-left: 240px;
+                padding: 20px;
+            }
+
+            table {
+                font-size: 14px;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+       <div class="sidebar">
+  <h1>Bare Bears<br>Kadayawan</h1>
+  <div class="user-info">
+    <p>Welcome, {{ username }}!</p>
+    <span class="user-indicator">User</span>
+  </div>
+
+  <ul>
+    <li><a href="{% url 'user_ordering' %}" class="hover-effect">Ordering</a></li>
+  </ul>
+</div>
+
+    <div class="main-content">
+        <h1>Order Tracking</h1>
+
+        <div class="order-controls" style="flex-direction: column; align-items: flex-start; gap: 10px;">
+            <input type="text" id="searchOrder" placeholder="Search orders..." oninput="searchOrders()">
+
+            <div style="display: flex; gap: 10px;">
+                <a href="{% url 'user_ordering_logs' %}" class="btn btn-warning">Order Transaction Logs</a>
+                <button class="btn btn-danger" onclick="clearOrderTransactions()">Clear Order Transaction</button>
+            </div>
+        </div>
+
+
+        <div id="empty-order-message" class="empty-alert">You have no orders yet.</div>
+
+        <table class="product-table" id="order-table">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="selectAll" onclick="toggleAllCheckboxes(this)"></th>
+                    <th>Order ID</th>
+                    <th>Customer Email</th>
+                    <th>Phone Number</th>
+                    <th>Delivery Address</th>
+                    <th>Product Name</th>
+                    <th>Product Price</th>
+                    <th>Quantity</th>
+                    <th>Shipping Cost</th>
+                    <th>Total Price</th>
+                    <th>Mode of Payment</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            fetchOrdersFromDatabase();
+        });
+
+        // Fetch orders from the API
+        function fetchOrdersFromDatabase() {
+            fetch("http://127.0.0.1:8000/api/get-tracking/")
+                .then(response => response.json())
+                .then(data => {
+                    const orderTableBody = document.getElementById("order-table").getElementsByTagName("tbody")[0];
+                    orderTableBody.innerHTML = "";
+
+                    if (!data || data.length === 0) {
+                        document.getElementById("empty-order-message").style.display = 'block';
+                        return;
+                    } else {
+                        document.getElementById("empty-order-message").style.display = 'none';
+                    }
+
+                    // Sort by created_at descending (fallback to ID if created_at is missing)
+                    data.sort((a, b) => {
+                        const dateA = new Date(a.created_at);
+                        const dateB = new Date(b.created_at);
+                        return isNaN(dateA) || isNaN(dateB)
+                            ? b.id - a.id // fallback to ID sorting
+                            : dateB - dateA;
+                    });
+
+                    data.forEach(order => {
+                        let nameList = '';
+                        let priceList = '';
+                        let quantityList = '';
+
+                        order.products.forEach(product => {
+                            nameList += `<div>${product.name.trim()}</div>`;
+                            priceList += `<div>₱${parseFloat(product.price).toFixed(2)}</div>`;
+                            quantityList += `<div>${product.quantity}</div>`;
+                        });
+
+                        let row = orderTableBody.insertRow();
+                        row.innerHTML = `
+                            <td><input type="checkbox" class="order-checkbox" value="${order.id}"></td>
+                            <td>${order.id}</td>
+                            <td>${order.customer_email || "N/A"}</td>
+
+                            <td>${order.customer_phone || "N/A"}</td>
+                            <td>${order.customer_address || "N/A"}</td>
+                            <td>${nameList}</td>
+                            <td>${priceList}</td>
+                            <td>${quantityList}</td>
+                            <td>₱${order.shipping_subtotal ? parseFloat(order.shipping_subtotal).toFixed(2) : '0.00'}</td>
+                            <td>₱${order.total_price}</td>
+                            <td>${order.payment_method || "N/A"}</td>
+                            <td class="${order.status === 'Confirmed' ? 'confirmed' : 'pending'}">
+                                <strong>${order.status || "N/A"}</strong>
+                            </td>
+                        `;
+                    });
+
+                    searchOrders(); // Refresh search if needed
+                })
+                .catch(error => console.error("Error fetching orders:", error));
+        }
+
+        // Toggle All checkboxes
+        function toggleAllCheckboxes(source) {
+            const checkboxes = document.querySelectorAll(".order-checkbox");
+            checkboxes.forEach(cb => cb.checked = source.checked);
+        }
+
+        // Clear selected orders
+        function clearOrderTransactions() {
+    const selected = document.querySelectorAll(".order-checkbox:checked");
+
+    if (selected.length === 0) {
+        alert("Please select at least one transaction to remove.");
+        return;
+    }
+
+    if (!confirm("Are you sure you want to remove the selected transaction(s)?")) {
+        return;
+    }
+
+    selected.forEach((cb) => {
+        const orderId = cb.value;
+
+        fetch(`http://127.0.0.1:8000/api/clear-orders/${orderId}/`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Failed to delete order with ID ${orderId}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            cb.closest("tr").remove();
+
+            // If no orders are left, show the empty order message
+            if (document.querySelectorAll("#order-table tbody tr").length === 0) {
+                document.getElementById("empty-order-message").style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error(error);
+            alert("An error occurred while removing orders.");
+        });
+    });
+}
+
+        // Search orders function
+        function searchOrders() {
+            let input = document.getElementById("searchOrder").value.toLowerCase();
+            let table = document.getElementById("order-table");
+            let rows = table.getElementsByTagName("tr");
+            let hasResults = false;
+
+            for (let i = 1; i < rows.length; i++) {
+                let rowText = rows[i].textContent.toLowerCase();
+
+                if (rowText.includes(input)) {
+                    rows[i].style.display = "";
+                    hasResults = true;
+                } else {
+                    rows[i].style.display = "none";
+                }
+            }
+
+            // Show empty message if no orders match the search
+            document.getElementById("empty-order-message").style.display = hasResults ? 'none' : 'block';
+        }
+    </script>
+
+</body>
+</html>

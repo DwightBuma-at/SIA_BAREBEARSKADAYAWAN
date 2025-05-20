@@ -1,0 +1,233 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="{% static 'myApp/css/admin-dashboard.css' %}?v=2">
+</head>
+<body>
+
+  <style>
+        /* General Styles */
+        body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      background-color: #f4f7f9;
+      color: #333;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: #2c3e50;
+      color: white;
+      padding: 25px 20px;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .sidebar h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 22px;
+      color: #f1c40f;
+      margin: 0;
+      text-align: center;
+      line-height: 1.4;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .user-info {
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    .user-info p {
+      font-weight: 600;
+      margin: 5px 0 3px;
+      font-size: 14px;
+    }
+
+    .admin-indicator {
+      display: inline-block;
+      background: #27ae60;
+      color: white;
+      padding: 2px 8px;
+      font-size: 12px;
+      border-radius: 12px;
+      margin-top: 3px;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 30px;
+    }
+
+    .sidebar ul li a {
+      color: white;
+      text-decoration: none;
+      display: block;
+      padding: 12px 15px;
+      border-radius: 6px;
+      transition: background 0.3s, transform 0.2s;
+      font-size: 15px;
+    }
+
+    .sidebar ul li a:hover {
+      background: #34495e;
+      transform: translateX(6px);
+    }
+
+    .main-content {
+      margin-left: 280px;
+      padding: 30px;
+      width: calc(100% - 280px);
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      color: #2980b9;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+        /* Overview Cards */
+        .content-card {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 30px;
+          margin-bottom: 30px;
+      }
+
+      .card {
+          background: #fff;
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+          padding: 25px;
+          border-radius: 15px;
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+          text-align: center;
+          min-height: 180px;
+      }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            font-size: 22px;
+            margin-bottom: 15px;
+            color: #2980b9;
+            font-weight: bold;
+        }
+
+        .card-content {
+            font-size: 18px;
+            color: #333;
+        }
+
+        .card-footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        .card-footer a {
+            text-decoration: none;
+            color: #2980b9;
+            font-weight: 600;
+        }
+
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+  </style>
+
+    <!-- Sidebar --> 
+    <div class="sidebar">
+        <h1>
+            <a href="{% url 'admin_dashboard' %}" style="text-decoration: none; color: inherit;">
+                Bare Bears<br>Kadayawan
+            </a>
+        </h1>
+        <div class="user-info">
+            <p>Welcome, {{ username }}!</p>
+            <span class="admin-indicator">Administrator</span>
+        </div>
+
+        <ul>
+            <li><a href="{% url 'admin_ordering' %}">Ordering</a></li>
+            <li><a href="{% url 'admin_booking' %}">Booking</a></li>
+            <li><a href="{% url 'admin_pos' %}">POS</a></li>
+            <li><a href="{% url 'admin_inventory' %}">Inventory</a></li>
+            <li><a href="{% url 'admin_purchasing' %}">Purchasing</a></li>
+            <li><a href="{% url 'admin_logout' %}">Logout</a></li>
+        </ul>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <h1>Admin Dashboard</h1>
+
+        <!-- Overview Cards -->
+<div class="content-card">
+    <div class="card">
+        <div class="card-header">Total Orders</div>
+        <div class="card-content">
+            <p>Currently, you have <strong>{{ total_orders }}</strong> orders placed.</p>
+        </div>
+        <div class="card-footer">
+            <a href="{% url 'admin_ordering' %}">View Orders</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Pending Bookings</div>
+        <div class="card-content">
+            <p>You have <strong>{{ pending_bookings }}</strong> pending bookings to process.</p>
+        </div>
+        <div class="card-footer">
+            <a href="{% url 'admin_booking' %}">View Bookings</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">POS Transactions</div>
+        <div class="card-content">
+            <p>Total POS transactions: <strong>{{ total_pos_transactions }}</strong></p>
+        </div>
+        <div class="card-footer">
+            <a href="{% url 'admin_pos' %}">Go to POS</a>
+        </div>
+    </div>
+</div>
+
+        <footer class="footer">
+            &copy; 2025 Bare Bears Kadayawan. All rights reserved.
+        </footer>
+
+        
+    </div>
+
+    <script>
+  // Replace this with your actual Supabase auth user fetching
+  const user = supabase.auth.user();  // make sure supabase client is initialized
+
+  const email = user?.email;
+  const username = email ? email.split('@')[0] : 'Guest';
+
+  document.querySelector('.user-info p').textContent = username;
+</script>
+
+</body>
+</html>

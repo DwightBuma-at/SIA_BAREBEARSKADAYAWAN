@@ -1,0 +1,665 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Ordering</title>
+</head>
+
+<style>
+    /* General Styles */
+body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      background-color: #f4f7f9;
+      color: #333;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: #2c3e50;
+      color: white;
+      padding: 25px 20px;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .sidebar h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 22px;
+      color: #f1c40f;
+      margin: 0;
+      text-align: center;
+      line-height: 1.4;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .user-info {
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    .user-info p {
+      font-weight: 600;
+      margin: 5px 0 3px;
+      font-size: 14px;
+    }
+
+    .admin-indicator {
+      display: inline-block;
+      background: #27ae60;
+      color: white;
+      padding: 2px 8px;
+      font-size: 12px;
+      border-radius: 12px;
+      margin-top: 3px;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 30px;
+    }
+
+    .sidebar ul li a {
+      color: white;
+      text-decoration: none;
+      display: block;
+      padding: 12px 15px;
+      border-radius: 6px;
+      transition: background 0.3s, transform 0.2s;
+      font-size: 15px;
+    }
+
+    .sidebar ul li a:hover {
+      background: #34495e;
+      transform: translateX(6px);
+    }
+
+    .main-content {
+      margin-left: 280px;
+      padding: 30px;
+      width: calc(100% - 280px);
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      color: #2980b9;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+/* Search Bar */
+.order-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+#searchOrder, #searchBooking {
+  width: 100%;
+  max-width: 300px;
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #bdc3c7;
+  border-radius: 5px;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+  padding: 14px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background: #2980b9;
+  color: white;
+  font-weight: bold;
+}
+
+tr:hover {
+  background: #ecf0f1;
+  transition: background 0.3s;
+}
+
+/* Status Labels */
+.status {
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.pending {
+  background: #f39c12;
+  color: white;
+}
+
+.confirmed {
+  background: #27ae60;
+  color: white;
+}
+
+/* Buttons */
+button {
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s, transform 0.2s;
+}
+
+button:hover {
+  background-color: darkred;
+  transform: scale(1.05);
+}
+
+
+.approve {
+  background: #27ae60;
+  color: white;
+}
+
+.approve:hover {
+  background: #218c53;
+}
+
+.cancel {
+  background: #e74c3c;
+  color: white;
+}
+
+.cancel:hover {
+  background: #c0392b;
+}
+
+.clear-btn {
+  background-color: #d9534f;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.clear-btn:hover {
+  background-color: #c9302c;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 220px;
+  }
+  
+  .main-content {
+    margin-left: 240px;
+  }
+
+  table {
+    font-size: 14px;
+  }
+
+  th, td {
+    padding: 8px;
+  }
+}
+
+    /* Styling for status dropdown */
+select {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #fff;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+    cursor: pointer;
+}
+
+select:hover {
+    border-color: #7e57c2;
+    background-color: #f9f6ff;
+}
+
+select:focus {
+    outline: none;
+    border-color: #512da8;
+    box-shadow: 0 0 4px rgba(81, 45, 168, 0.3);
+}
+
+/* Optional: Color-code statuses */
+select option[value="Pending"] {
+    color: #ff9800;
+}
+select option[value="Processing"] {
+    color: #03a9f4;
+}
+select option[value="Shipped"] {
+    color: #00bcd4;
+}
+select option[value="Out For Delivery"] {
+    color: #2196f3;
+}
+select option[value="Delivered"] {
+    color: #4caf50;
+}
+select option[value="Failed Attempt"],
+select option[value="Return to Sender"],
+select option[value="Cancelled"] {
+    color: #f44336;
+}
+select option[value="Ready to Claim"] {
+    color: #ffb300;
+}
+select option[value="Claimed"] {
+    color: #388e3c;
+}
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 999;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  background-color: #fff;
+  margin: 15% auto;
+  padding: 25px;
+  border: 1px solid #888;
+  width: 400px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  position: relative;
+  text-align: center;
+}
+
+.modal-content p {
+  font-size: 16px;
+  margin: 0 0 15px;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.confirm-btn, .cancel-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.confirm-btn {
+  background-color: #4caf50;
+  color: white;
+}
+
+.cancel-btn {
+  background-color: #f44336;
+  color: white;
+}
+
+.close {
+  color: #aaa;
+  position: absolute;
+  right: 15px;
+  top: 10px;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.clear-order-btn {
+    background-color: #e53935; /* Reddish tone */
+    color: white;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.clear-order-btn:hover {
+    background-color: #c62828;
+}
+
+.logs-btn {
+    background-color: #9e9e9e; /* Grayish tone */
+    color: white;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.logs-btn:hover {
+    background-color: #757575;
+}
+</style>
+<body>
+  <div class="sidebar">
+  <h1>
+    <a href="{% url 'admin_dashboard' %}" style="text-decoration: none; color: inherit;">
+      Bare Bears<br>Kadayawan
+    </a>
+  </h1>
+  <div class="user-info">
+    <p>Welcome, {{ username }}!</p>
+    <span class="admin-indicator">Administrator</span>
+  </div>
+
+  <ul>
+    <li><a href="{% url 'admin_ordering' %}">Ordering</a></li>
+    <li><a href="{% url 'admin_booking' %}">Booking</a></li>
+    <li><a href="{% url 'admin_pos' %}">POS</a></li>
+    <li><a href="{% url 'admin_inventory' %}">Inventory</a></li>
+    <li><a href="{% url 'admin_purchasing' %}">Purchasing</a></li>
+    <li><a href="{% url 'admin_logout' %}">Logout</a></li>
+  </ul>
+</div>
+    <div class="main-content">
+        <h1>Manage Orders</h1>
+        
+        <div class="order-controls">
+        <input type="text" id="searchOrder" placeholder="Search orders..." oninput="searchOrders()">
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <button class="clear-order-btn" onclick="clearSelectedOrders()">Clear Order Transaction</button>
+            <button class="logs-btn" onclick="viewTransactionLogs()">Order Transaction Logs</button>
+        </div>
+        
+        
+        <table>
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="selectAll" onclick="toggleAllCheckboxes(this)"></th>
+                    <th>Order ID</th>
+                    <th>Customer Email</th>
+                    <th>Phone Number</th>
+                    <th>Delivery Address</th>
+                    <th>Product Name</th>
+                    <th>Product Price</th>
+                    <th>Quantity</th>
+                    <th>Shipping</th> <!-- Added Shipping column -->
+                    <th>Total Price</th>
+                    <th>Mode of Payment</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="orderTable">
+                <!-- Orders will be dynamically added here -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- SUCCESS MODAL -->
+<div id="successModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('successModal')">&times;</span>
+    <p id="successMessage"></p>
+  </div>
+</div>
+
+<!-- CONFIRMATION MODAL -->
+<div id="confirmModal" class="modal">
+  <div class="modal-content">
+    <p id="confirmMessage"></p>
+    <div class="modal-buttons">
+      <button class="confirm-btn" id="confirmYesBtn">Yes</button>
+      <button class="cancel-btn" onclick="closeModal('confirmModal')">No</button>
+    </div>
+  </div>
+</div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", fetchOrders);
+
+        async function fetchOrders() {
+    const response = await fetch('/api/admin-get-orders/')
+
+    const data = await response.json();
+
+    // Sort the orders so the newest (highest ID) appears first
+    data.sort((a, b) => b.id - a.id); // You can change to b.created_at.localeCompare(a.created_at) if using timestamps
+
+    const orderTable = document.getElementById("orderTable");
+    orderTable.innerHTML = ""; // Clear previous rows
+
+    data.forEach(order => {
+        const productNames = order.products.map(item => `<div>${item.name.trim()}</div>`).join("");
+        const productPrices = order.products.map(item => `₱${parseFloat(item.price).toFixed(2)}`).join("<br>");
+        const quantities = order.products.map(item => item.quantity).join("<br>");
+        const shippingCost = `₱${parseFloat(order.shipping_subtotal || 0).toFixed(2)}`;
+        const formattedTotalPrice = `₱${parseFloat(order.total_price || 0).toFixed(2)}`;
+
+        let statusOptions = "";
+        if (order.payment_method.toLowerCase() === "store pick-up") {
+            statusOptions = `
+                <option value="Pending" ${order.status === "Pending" || !order.status ? "selected" : ""}>Pending</option>
+                <option value="Ready to Claim" ${order.status === "Ready to Claim" ? "selected" : ""}>Ready to Claim</option>
+                <option value="Claimed" ${order.status === "Claimed" ? "selected" : ""}>Claimed</option>
+                <option value="Cancelled" ${order.status === "Cancelled" ? "selected" : ""}>Cancelled</option>
+            `;
+        } else {
+            statusOptions = `
+                <option value="Pending" ${order.status === "Pending" || !order.status ? "selected" : ""}>Pending</option>
+                <option value="Processing" ${order.status === "Processing" ? "selected" : ""}>Processing</option>
+                <option value="Shipped" ${order.status === "Shipped" ? "selected" : ""}>Shipped</option>
+                <option value="Out For Delivery" ${order.status === "Out For Delivery" ? "selected" : ""}>Out For Delivery</option>
+                <option value="Delivered" ${order.status === "Delivered" ? "selected" : ""}>Delivered</option>
+                <option value="Failed Attempt" ${order.status === "Failed Attempt" ? "selected" : ""}>Failed Attempt</option>
+                <option value="Return to Sender" ${order.status === "Return to Sender" ? "selected" : ""}>Return to Sender</option>
+                <option value="Cancelled" ${order.status === "Cancelled" ? "selected" : ""}>Cancelled</option>
+            `;
+        }
+
+        const row = `<tr>
+            <td><input type="checkbox" class="order-checkbox" value="${order.id}"></td>
+            <td>${order.id}</td>
+            <td>${order.customer_email}</td>
+
+            <td>${order.customer_phone}</td>
+            <td>${order.customer_address}</td>
+            <td>${productNames}</td>
+            <td>${productPrices}</td>
+            <td>${quantities}</td>
+            <td>${shippingCost}</td>
+            <td>${formattedTotalPrice}</td>
+            <td>${order.payment_method}</td>
+            <td>
+                <select onchange="updateStatus(${order.id}, this.value)">
+                    ${statusOptions}
+                </select>
+            </td>
+        </tr>`;
+        orderTable.innerHTML += row;
+    });
+}
+
+
+        function viewTransactionLogs() {
+            window.location.href = "{% url 'admin_ordering_logs' %}"; // Replace 'admin_ordering_logs' with the actual URL name for your logs page
+        }
+
+        // Select/Deselect all checkboxes
+        function toggleAllCheckboxes(source) {
+            const checkboxes = document.querySelectorAll(".order-checkbox");
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = source.checked;
+            });
+        }
+
+        // Clear selected orders
+        function clearSelectedOrders() {
+            const selectedOrders = Array.from(document.querySelectorAll(".order-checkbox:checked")).map(checkbox => checkbox.value);
+
+            if (selectedOrders.length === 0) {
+                showSuccess("No orders selected.");
+                return;
+            }
+
+            showConfirm("Are you sure you want to delete the selected orders?", () => {
+    selectedOrders.forEach(orderId => {
+        fetch(`http://127.0.0.1:8000/api/delete-tracking/${orderId}/`, {
+            method: "DELETE",
+            headers: {
+                "X-CSRFToken": getCSRFToken()
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                fetchOrders(); // Refresh the table
+            }
+        });
+    });
+    showSuccess("Transaction removal completed!");
+});
+
+            selectedOrders.forEach(orderId => {
+                fetch(`http://127.0.0.1:8000/api/delete-tracking/${orderId}/`, {
+                    method: "DELETE",
+                    headers: {
+                        "X-CSRFToken": getCSRFToken()
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        console.log(`✅ Order ${orderId} deleted successfully.`);
+                        fetchOrders(); // Refresh the table
+                    } else {
+                        console.error(`❌ Failed to delete order ${orderId}:`, response.status, response.statusText);
+                    }
+                })
+                .catch(error => console.error(`🔥 Error deleting order ${orderId}:`, error));
+            });
+
+            alert("Transaction Removed completed!"); // Show success alert
+        }
+
+
+
+        function getCSRFToken() {
+            return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        }
+
+        function updateStatus(orderId, newStatus) {
+            fetch(`http://127.0.0.1:8000/api/update-tracking/${orderId}/`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCSRFToken()
+                },
+                body: JSON.stringify({ status: newStatus })
+            })
+            .then(response => response.json())
+            .then(data => {
+                showSuccess(`Order ${orderId} status updated to: ${newStatus}`);
+            })
+            .catch(error => console.error("Error updating status:", error));
+        }
+
+        function removeOrder(orderId) {
+            if (!confirm("Are you sure you want to remove this order?")) return;
+
+            fetch(`http://127.0.0.1:8000/api/delete-tracking/${orderId}/`, {
+                method: "DELETE",
+                headers: {
+                    "X-CSRFToken": getCSRFToken()
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    console.log(`✅ Order ${orderId} deleted successfully.`);
+                    fetchOrders(); // Refresh table
+                    alert("Transaction Removed completed!"); // Show success alert
+                } else {
+                    console.error(`❌ Failed to delete order ${orderId}:`, response.status, response.statusText);
+                }
+            })
+            .catch(error => console.error(`🔥 Error removing order ${orderId}:`, error));
+        }
+
+
+
+        function searchOrders() {
+            var input = document.getElementById("searchOrder").value.toLowerCase();
+            var rows = document.getElementById("orderTable").getElementsByTagName("tr");
+
+            for (var i = 0; i < rows.length; i++) {
+                var cells = rows[i].getElementsByTagName("td");
+                var match = false;
+
+                for (var j = 1; j < cells.length; j++) {  // Start from 1 to skip the checkbox column
+                    if (cells[j].textContent.toLowerCase().includes(input)) {
+                        match = true;
+                        break;
+                    }
+                }
+
+                rows[i].style.display = match ? "" : "none";
+            }
+        }
+
+        function showSuccess(message) {
+    const modal = document.getElementById('successModal');
+    document.getElementById('successMessage').innerText = message;
+    modal.style.display = 'block';
+}
+
+function showConfirm(message, callback) {
+    const modal = document.getElementById('confirmModal');
+    document.getElementById('confirmMessage').innerText = message;
+    modal.style.display = 'block';
+
+    const yesBtn = document.getElementById('confirmYesBtn');
+    yesBtn.onclick = function () {
+        modal.style.display = 'none';
+        callback();
+    };
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
+
+// Ensure search bar works after DOM is loaded and orders are fetched
+document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("searchOrder").addEventListener("input", searchOrders);
+});
+    </script>
+</body>
+</html>

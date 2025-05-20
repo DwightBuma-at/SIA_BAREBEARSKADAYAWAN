@@ -1,0 +1,251 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+</head>
+<body>
+    <style>
+        /* General Styles */
+body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      background-color: #f4f7f9;
+      color: #333;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: #2c3e50;
+      color: white;
+      padding: 25px 20px;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .sidebar h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 22px;
+      color: #f1c40f;
+      margin: 0;
+      text-align: center;
+      line-height: 1.4;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .user-info {
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    .user-info p {
+      font-weight: 600;
+      margin: 5px 0 3px;
+      font-size: 14px;
+    }
+
+    .user-indicator {
+      display: inline-block;
+      background: #27ae60;
+      color: white;
+      padding: 2px 8px;
+      font-size: 12px;
+      border-radius: 12px;
+      margin-top: 3px;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 30px;
+    }
+
+    .sidebar ul li a {
+      color: white;
+      text-decoration: none;
+      display: block;
+      padding: 12px 15px;
+      border-radius: 6px;
+      transition: background 0.3s, transform 0.2s;
+      font-size: 15px;
+    }
+
+    .sidebar ul li a:hover {
+      background: #34495e;
+      transform: translateX(6px);
+    }
+
+    .main-content {
+      margin-left: 280px;
+      padding: 30px;
+      width: calc(100% - 280px);
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      color: #2980b9;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+ .subtitle {
+            font-size: 16px;
+            color: #95a5a6;
+            margin-bottom: 30px;
+        }
+
+        .dashboard-overview {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .card {
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            padding: 28px;
+            border-radius: 15px;
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 320px;
+            flex: 1;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .card .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            color: #2980b9;
+        }
+
+        .card-orders .icon {
+            color: #27ae60;
+        }
+
+        .card-bookings .icon {
+            color: #e67e22;
+        }
+
+        .card h3 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .card p {
+            font-size: 15px;
+            color: #7f8c8d;
+            margin-bottom: 16px;
+        }
+
+        .view-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .view-btn:hover {
+            background-color: #2c80b4;
+            transform: scale(1.05);
+        }
+
+        .enhanced-banner {
+            background: linear-gradient(to right, #ecf0f1, #fdfdfd);
+            border-left: 8px solid #3498db;
+            border-radius: 12px;
+            padding: 25px 30px;
+            margin-top: 50px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+        }
+
+        .enhanced-banner h4 {
+            font-size: 17px;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+
+        .enhanced-banner p {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        .enhanced-banner a {
+            color: #2980b9;
+            text-decoration: underline;
+            font-weight: 500;
+        }
+    </style>
+
+    <div class="sidebar">
+  <h1>
+    <a href="{% url 'user_dashboard' %}" style="text-decoration: none; color: inherit;">
+      Bare Bears<br>Kadayawan
+    </a>
+  </h1>
+  <div class="user-info">
+    <p>Welcome, {{ username }}!</p>
+    <span class="user-indicator">User</span>
+  </div>
+
+        <ul>
+            <li><a href="{% url 'user_ordering' %}" class="hover-effect">Ordering</a></li>
+            <li><a href="{% url 'user_booking' %}" class="hover-effect">Booking</a></li>
+            <li><a href="{% url 'user_about' %}" class="hover-effect">About</a></li>
+            <li><a href="{% url 'user_settings' %}" class="hover-effect">Settings</a></li>
+            <li><a href="{% url 'user_logout' %}" class="hover-effect">Log Out</a></li>
+        </ul>
+    </div>
+
+  <div class="main-content">
+        <header class="dashboard-header">
+            <h1>Welcome Back, Dong!</h1>
+            <p class="subtitle">Here's an overview of your recent activities with <strong>Bare Bears Kadayawan</strong>.</p>
+        </header>
+
+        <section class="dashboard-overview">
+            <div class="card card-orders spotlight">
+                <div class="icon">&#128179;</div>
+                <h3>My Orders</h3>
+                <p><strong>{{ pending_orders }}</strong> Pending</p>
+                <a href="{% url 'user_ordering' %}" class="view-btn">View Orders</a>
+            </div>
+
+            <div class="card card-bookings spotlight">
+                <div class="icon">&#128197;</div>
+                <h3>My Bookings</h3>
+                <p><strong>{{ upcoming_bookings }}</strong> Upcoming</p>
+                <a href="{% url 'user_booking' %}" class="view-btn">View Bookings</a>
+            </div>
+        </section>
+
+        <section class="dashboard-extra">
+            <div class="info-banner enhanced-banner">
+                <h4>Need Assistance?</h4>
+                <p>Visit our <a href="{% url 'user_about' %}">About Page</a> or reach out to our team for personalized support.</p>
+            </div>
+        </section>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,252 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+</head>
+<body>
+
+    <style>
+        /* General Styles */
+body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      background-color: #f4f7f9;
+      color: #333;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: #2c3e50;
+      color: white;
+      padding: 25px 20px;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .sidebar h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 22px;
+      color: #f1c40f;
+      margin: 0;
+      text-align: center;
+      line-height: 1.4;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .user-info {
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    .user-info p {
+      font-weight: 600;
+      margin: 5px 0 3px;
+      font-size: 14px;
+      color: white; /* <-- add this line */
+    }
+
+    .user-indicator {
+      display: inline-block;
+      background: #27ae60;
+      color: white;
+      padding: 2px 8px;
+      font-size: 12px;
+      border-radius: 12px;
+      margin-top: 3px;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 30px;
+    }
+
+    .sidebar ul li a {
+      color: white;
+      text-decoration: none;
+      display: block;
+      padding: 12px 15px;
+      border-radius: 6px;
+      transition: background 0.3s, transform 0.2s;
+      font-size: 15px;
+    }
+
+    .sidebar ul li a:hover {
+      background: #34495e;
+      transform: translateX(6px);
+    }
+
+    .main-content {
+      margin-left: 280px;
+      padding: 30px;
+      width: calc(100% - 280px);
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      color: #2980b9;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+p {
+  color: #7f8c8d;
+  font-size: 1.1rem;
+}
+
+.settings-section {
+  margin-bottom: 30px;
+}
+
+.settings-section h2 {
+  font-size: 1.8rem;
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+form label {
+  font-size: 1.1rem;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+form input[type="checkbox"] {
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+form select {
+  padding: 12px;
+  font-size: 1rem;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  transition: all 0.3s ease-in-out;
+}
+
+form select:hover, form select:focus {
+  border-color: #2c3e50;
+}
+
+.save-btn {
+  padding: 12px 25px;
+  background-color: #2c3e50;
+  color: white;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: block;
+  margin-top: 20px;
+  width: 220px;
+  text-align: center;
+  transition: background 0.3s ease-in-out, transform 0.2s;
+}
+
+.save-btn:hover {
+  background-color: #34495e;
+  transform: scale(1.05);
+}
+    </style>
+    
+  <div class="sidebar">
+  <h1>
+    <a href="{% url 'user_dashboard' %}" style="text-decoration: none; color: inherit;">
+      Bare Bears<br>Kadayawan
+    </a>
+  </h1>
+  <div class="user-info">
+    <p>Welcome, {{ username }}!</p>
+    <span class="user-indicator">User</span>
+</div>
+
+
+  <ul>
+    <li><a href="{% url 'user_ordering' %}" class="hover-effect">Ordering</a></li>
+    <li><a href="{% url 'user_booking' %}" class="hover-effect">Booking</a></li>
+    <li><a href="{% url 'user_about' %}" class="hover-effect">About</a></li>
+    <li><a href="{% url 'user_settings' %}" class="hover-effect">Settings</a></li>
+     <li><a href="{% url 'user_logout' %}" class="hover-effect">Log Out</a></li>
+  </ul>
+</div>
+
+    <div class="main-content">
+        <h1>Settings</h1>
+        <p>Manage your preferences.</p>
+    
+        <div class="settings-section">
+            <h2>Notification Settings</h2>
+            <form>
+                <label for="email-notifications">
+                    <input type="checkbox" id="email-notifications">
+                    Email Notifications
+                </label>
+    
+                <label for="sms-notifications">
+                    <input type="checkbox" id="sms-notifications">
+                    SMS Notifications
+                </label>
+    
+                <label for="push-notifications">
+                    <input type="checkbox" id="push-notifications">
+                    Push Notifications
+                </label>
+            </form>
+        </div>
+    
+        <div class="settings-section">
+            <h2>Account Preferences</h2>
+            <form>
+                <label for="language">Language</label>
+                <select id="language">
+                    <option value="english">English</option>
+                    <option value="spanish">Spanish</option>
+                    <option value="french">French</option>
+                    <option value="german">German</option>
+                </select>
+    
+                <label for="timezone">Time Zone</label>
+                <select id="timezone">
+                    <option value="gmt+8">GMT+8</option>
+                    <option value="gmt+5">GMT+5</option>
+                    <option value="gmt+0">GMT+0</option>
+                    <option value="gmt-5">GMT-5</option>
+                </select>
+    
+        <button type="submit" class="save-btn">Save Preferences</button>
+      </div>    
+<script type="module">
+  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+  const supabase = createClient(
+    'https://your-project.supabase.co',  // ← replace with your Supabase URL
+    'your-anon-key'                      // ← replace with your anon/public key
+  );
+
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (user && user.email) {
+    const name = user.email.split('@')[0];
+    document.getElementById("user-display").textContent = name;
+  } else {
+    document.getElementById("user-display").textContent = "Guest";
+  }
+</script>
+
+
+    </body>
+</html>

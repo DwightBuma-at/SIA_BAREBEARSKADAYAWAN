@@ -1,0 +1,345 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Ordering</title>
+    <link rel="stylesheet" href="{% static 'myApp/css/user-ordering.css' %}">
+</head>
+
+<style>
+
+  /* General Styles */
+body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      background-color: #f4f7f9;
+      color: #333;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: #2c3e50;
+      color: white;
+      padding: 25px 20px;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .sidebar h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 22px;
+      color: #f1c40f;
+      margin: 0;
+      text-align: center;
+      line-height: 1.4;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .user-info {
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    .user-info p {
+      font-weight: 600;
+      margin: 5px 0 3px;
+      font-size: 14px;
+      color: white; /* <-- add this line */
+    }
+
+    .user-indicator {
+      display: inline-block;
+      background: #27ae60;
+      color: white;
+      padding: 2px 8px;
+      font-size: 12px;
+      border-radius: 12px;
+      margin-top: 3px;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 30px;
+    }
+
+    .sidebar ul li a {
+      color: white;
+      text-decoration: none;
+      display: block;
+      padding: 12px 15px;
+      border-radius: 6px;
+      transition: background 0.3s, transform 0.2s;
+      font-size: 15px;
+    }
+
+    .sidebar ul li a:hover {
+      background: #34495e;
+      transform: translateX(6px);
+    }
+
+    .main-content {
+      margin-left: 280px;
+      padding: 30px;
+      width: calc(100% - 280px);
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      color: #2980b9;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+/* Search Bar */
+.order-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+#searchOrder, #searchBooking {
+  width: 100%;
+  max-width: 300px;
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #bdc3c7;
+  border-radius: 5px;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+  padding: 14px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background: #2980b9;
+  color: white;
+  font-weight: bold;
+}
+
+tr:hover {
+  background: #ecf0f1;
+  transition: background 0.3s;
+}
+
+/* Status Labels */
+.status {
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.pending {
+  background: #f39c12;
+  color: white;
+}
+
+.confirmed {
+  background: #27ae60;
+  color: white;
+}
+
+/* Buttons */
+button {
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s, transform 0.2s;
+}
+
+button:hover {
+  background-color: darkred;
+  transform: scale(1.05);
+}
+
+
+.approve {
+  background: #27ae60;
+  color: white;
+}
+
+.approve:hover {
+  background: #218c53;
+}
+
+.cancel {
+  background: #e74c3c;
+  color: white;
+}
+
+.cancel:hover {
+  background: #c0392b;
+}
+
+.clear-btn {
+  background-color: #d9534f;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.clear-btn:hover {
+  background-color: #c9302c;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 220px;
+  }
+  
+  .main-content {
+    margin-left: 240px;
+  }
+
+  table {
+    font-size: 14px;
+  }
+
+  th, td {
+    padding: 8px;
+  }
+}
+
+    /* Styling for status dropdown */
+select {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #fff;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+    cursor: pointer;
+}
+
+select:hover {
+    border-color: #7e57c2;
+    background-color: #f9f6ff;
+}
+
+select:focus {
+    outline: none;
+    border-color: #512da8;
+    box-shadow: 0 0 4px rgba(81, 45, 168, 0.3);
+}
+
+/* Optional: Color-code statuses */
+select option[value="Pending"] {
+    color: #ff9800;
+}
+select option[value="Processing"] {
+    color: #03a9f4;
+}
+select option[value="Shipped"] {
+    color: #00bcd4;
+}
+select option[value="Out For Delivery"] {
+    color: #2196f3;
+}
+select option[value="Delivered"] {
+    color: #4caf50;
+}
+select option[value="Failed Attempt"],
+select option[value="Return to Sender"],
+select option[value="Cancelled"] {
+    color: #f44336;
+}
+select option[value="Ready to Claim"] {
+    color: #ffb300;
+}
+select option[value="Claimed"] {
+    color: #388e3c;
+}
+</style>
+<body>
+    <div class="sidebar">
+  <h1>Bare Bears<br>Kadayawan</h1>
+  <div class="user-info">
+    <p>Welcome, {{ username }}!</p>
+    <span class="user-indicator">User</span>
+  </div>
+
+  <ul>
+    <li><a href="{% url 'user_ordering' %}" class="hover-effect">Ordering</a></li>
+  </ul>
+</div>
+    <div class="main-content">
+        <h1>Order Transaction Logs</h1>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <button class="clear-btn" onclick="clearSelectedOrders()">Clear Order Transaction</button>
+        </div>
+        
+        
+        <table>
+          <thead>
+              <tr>
+                  <th>Order ID</th>
+                  <th>Email</th>
+                  <th>Phone Number</th>
+                  <th>Delivery Address</th>
+                  <th>Product Name</th>
+                  <th>Total Price</th>
+                  <th>Mode of Payment</th>
+                  <th>Removed At</th>
+              </tr>
+          </thead>
+          <tbody>
+    {% for log in utlogs %}
+    {% for item in log.items.all %}
+        <tr>
+            <td>{{ log.booking_id }}</td>
+            <td>{{ log.customer_email }}</td>
+            <td>{{ log.phone_number }}</td>
+            <td>{{ log.delivery_address }}</td>
+            <td>{{ item.product_name }}</td>
+            <td>{{ item.price|floatformat:2 }}</td>
+            <td>{{ log.mode_of_payment }}</td>
+            <td>{{ log.removed_at }}</td>
+        </tr>
+    {% endfor %}
+{% empty %}
+    <tr>
+        <td colspan="8" style="text-align: center;">No deleted transactions found.</td>
+    </tr>
+{% endfor %}
+
+</tbody>
+
+      </table>
+    </div>
+
+    <script>
+    </script>
+</body>
+</html>

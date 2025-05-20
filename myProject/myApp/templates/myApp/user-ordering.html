@@ -1,0 +1,836 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ordering</title>
+  <style>
+    /* General Styles */
+body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      background-color: #f4f7f9;
+      color: #333;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: #2c3e50;
+      color: white;
+      padding: 25px 20px;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .sidebar h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 22px;
+      color: #f1c40f;
+      margin: 0;
+      text-align: center;
+      line-height: 1.4;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .user-info {
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    .user-info p {
+      font-weight: 600;
+      margin: 5px 0 3px;
+      font-size: 14px;
+      color: white; /* <-- add this line */
+    }
+
+    .user-indicator {
+      display: inline-block;
+      background: #27ae60;
+      color: white;
+      padding: 2px 8px;
+      font-size: 12px;
+      border-radius: 12px;
+      margin-top: 3px;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 30px;
+    }
+
+    .sidebar ul li a {
+      color: white;
+      text-decoration: none;
+      display: block;
+      padding: 12px 15px;
+      border-radius: 6px;
+      transition: background 0.3s, transform 0.2s;
+      font-size: 15px;
+    }
+
+    .sidebar ul li a:hover {
+      background: #34495e;
+      transform: translateX(6px);
+    }
+
+    .main-content {
+      margin-left: 280px;
+      padding: 30px;
+      width: calc(100% - 280px);
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      color: #2980b9;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+p {
+  color: #7f8c8d;
+}
+
+.product-form {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.product-form label {
+  display: block;
+  margin: 10px 0 5px;
+}
+
+.product-form input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #bdc3c7;
+  border-radius: 5px;
+}
+
+.product-form button {
+  padding: 10px 15px;
+  background-color: #2980b9;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.product-form button:hover {
+  background-color: #3498db;
+}
+
+.product-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.product-card {
+  width: 250px;
+  padding: 20px;
+  background: #fff;
+  border: 1px solid #bdc3c7;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.product-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+}
+
+.product-card img {
+  width: 100%;
+  height: 250px; /* Increased height for images */
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+.product-card h3 {
+  margin: 10px 0 5px;
+  color: #34495e;
+}
+
+.product-card p {
+  color: #7f8c8d;
+  margin-bottom: 10px;
+}
+
+.product-card button {
+  padding: 10px 20px; /* Bigger buttons */
+  margin: 5px;
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.product-card button:hover {
+  background-color: #c0392b;
+}
+
+.product-description {
+  font-style: italic;
+  color: #555;
+  padding-top: 10px;
+  font-size: 14px;
+}
+
+
+/* Cart Styles */
+.cart-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: #fff;
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  cursor: pointer;
+}
+
+.cart-count {
+  font-size: 18px;
+  margin-left: 5px;
+}
+
+.cart-dropdown {
+  position: fixed;
+  top: 80px; /* Adjust as needed to avoid overlap with cart */
+  right: 20px;
+  width: 300px; /* Set width */
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: none; /* Keep hidden initially */
+  z-index: 999;
+}
+
+.cart-dropdown.show {
+  display: block;
+}
+
+.cart-dropdown .cart-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  padding: 5px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.cart-item img {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 5px;
+  margin-right: 10px;
+}
+
+.cart-item span {
+  flex-grow: 1;
+  color: #333;
+}
+
+.cart-item button,
+.cart-item .quantity-button {
+  background-color: #ff5733;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 12px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.cart-item button:hover,
+.cart-item .quantity-button:hover {
+  background-color: #e14a29;
+}
+
+.cart-item .quantity-buttons {
+  display: flex;
+  align-items: center;
+}
+
+.cart-item .quantity {
+  margin: 0 10px;
+  font-size: 14px;
+}
+
+.cart-dropdown .total-price {
+  font-weight: bold;
+  margin-top: 10px;
+  font-size: 16px;
+}
+
+.cart-dropdown button.checkout-btn {
+  width: 100%;
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 15px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.cart-dropdown button.checkout-btn:hover {
+  background-color: #0056b3;
+}
+
+/* Cart Overlay */
+.cart-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  display: none;
+  z-index: 999;
+}
+
+.cart-overlay.show {
+  display: block;
+}
+
+/* Select All Checkbox */
+.select-all {
+  margin-bottom: 10px;
+}
+
+.search-bar-container {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.search-bar {
+  width: 100%;
+  max-width: 400px;
+  padding: 10px 15px;
+  border: 2px solid #ddd;
+  border-radius: 25px;
+  font-size: 16px;
+  outline: none;
+  transition: all 0.3s ease-in-out;
+}
+
+.search-bar:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+}
+
+
+    .cart-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      cursor: pointer;
+    }
+    .cart-container:hover {
+      transform: scale(1.2);
+    }
+    .order-button-container {
+      position: fixed;
+      left: 83%;
+      top: 20px;
+      z-index: 2;
+    }
+    .order-button-container button {
+      padding: 10px 20px;
+      background-color: #e74c3c;
+      border: none;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      margin: 4px 2px;
+      border-radius: 5px;
+    }
+    .order-button-container button:hover {
+      background-color: #34495e;
+      transform: scale(1.05);
+    }
+    .cart-dropdown {
+      display: none;
+      position: fixed;
+      top: 50px;
+      right: 20px;
+      background: white;
+      padding: 10px;
+      border: 1px solid #ccc;
+      z-index: 3;
+    }
+    .cart-dropdown.show {
+      display: block;
+    }
+    .main-content {
+      padding: 20px;
+    }
+    .product-card {
+      width: 200px;
+      margin: 20px;
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+    .product-description {
+      display: none;
+    }
+    .quantity-buttons button {
+      padding: 5px 10px;
+    }
+    .product-list {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    .cart-dropdown {
+      display: none;
+      position: fixed;
+      top: 50px;
+      right: 20px;
+      background: #fff;
+      padding: 20px;
+      border: 1px solid #ccc;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      z-index: 3;
+      width: 300px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .cart-dropdown h3 {
+      font-size: 1.5em;
+      margin-bottom: 10px;
+    }
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .cart-item img {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 5px;
+      margin-right: 10px;
+    }
+    .cart-item label {
+      display: flex;
+      align-items: center;
+    }
+    .cart-item span {
+      flex-grow: 1;
+      margin-left: 10px;
+    }
+  
+    .cart-item button {
+      background-color: #e74c3c;
+      border: none;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .cart-item button:hover {
+      background-color: #c0392b;
+    }
+    #select-all {
+      margin-right: 5px;
+    }
+
+    button {
+      padding: 8px 12px;
+      background-color: #e74c3c; /* Orange */
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #c0392b; /* Darker orange on hover */
+    }
+
+    button:active {
+      background-color: #c96c00;
+      transform: scale(0.98);
+    }
+  </style>
+
+  
+<body>
+  <!-- Add the CSRF token -->
+  <input type="hidden" name="csrfmiddlewaretoken" value="{% csrf_token %}">
+  
+  <!-- Order Button Container -->
+  <div class="order-button-container">
+    <button onclick="window.location.href='{% url 'user_ordering_tracking' %}'">View your Order</button>
+  </div>
+
+  <!-- Cart Container -->
+  <div class="cart-container" onclick="toggleCart()">
+    🛒 <span id="cart-count">0</span>
+  </div>
+
+  <!-- Cart Dropdown -->
+  <div id="cart-dropdown" class="cart-dropdown">
+    <h3>Cart</h3>
+    <div id="cart-items"></div>
+    <input type="checkbox" id="select-all" onchange="toggleSelectAll(this)"> Select All
+    <p id="total-price">Total: ₱0.00</p>
+    <button onclick="validateCheckout()">Checkout</button>
+  </div>
+
+  <div class="sidebar">
+  <h1>
+    <a href="{% url 'user_dashboard' %}" style="text-decoration: none; color: inherit;">
+      Bare Bears<br>Kadayawan
+    </a>
+  </h1>
+  <div class="user-info">
+    <p>Welcome, {{ username }}!</p>
+    <span class="user-indicator">User</span>
+  </div>
+
+  <ul>
+    <li><a href="{% url 'user_ordering' %}" class="hover-effect">Ordering</a></li>
+    <li><a href="{% url 'user_booking' %}" class="hover-effect">Booking</a></li>
+    <li><a href="{% url 'user_about' %}" class="hover-effect">About</a></li>
+    <li><a href="{% url 'user_settings' %}" class="hover-effect">Settings</a></li>
+     <li><a href="{% url 'user_logout' %}" class="hover-effect">Log Out</a></li>
+  </ul>
+</div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <h1>Products</h1>
+
+    <!-- Search Bar -->
+  <div class="search-bar-container">
+    <input type="text" id="search-bar" class="search-bar" placeholder="Search for products...">
+  </div>
+
+    <div id="product-list" class="product-list"></div>
+  </div>
+  
+  <script>
+    // Global cart variable, fetched from localStorage if available.
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    // Global products array, will be populated from API.
+    let products = [];
+
+    document.addEventListener("DOMContentLoaded", function () {
+      fetchProducts();
+      updateCart();
+    });
+
+    function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+   
+   // Fetch products from the API endpoint.
+    function fetchProducts() {
+      fetch('/api/admininventory/')
+        .then(response => response.json())
+        .then(data => {
+          // Store products globally.
+          products = data;
+          displayProducts(data);
+        })
+        .catch(error => console.error('Error fetching products:', error));
+    }
+
+    // Render product cards using the API data.
+    function displayProducts(products) {
+      const productContainer = document.getElementById("product-list");
+      productContainer.innerHTML = "";
+
+      // Sort products by their ID in ascending order
+      products.sort((a, b) => a.id - b.id);
+
+      products.forEach(product => {
+        const productCard = document.createElement("div");
+        productCard.classList.add("product-card");
+
+        productCard.innerHTML = `
+          <img src="${product.image}" alt="${product.name}" onclick="showDescription(this)">
+          <h3>${product.name}</h3>
+          <p>₱${product.price}</p>
+          <button onclick="addToCart('${product.id}', '${product.name}', ${product.price}, '${product.image}', ${product.stock})">Add to Cart</button>
+          <button onclick="buyNow('${product.id}', '${product.name}', ${product.price}, '${product.image}', ${product.stock})">Buy Now</button>
+          <div class="product-description" style="display:none;">
+            <p>${product.description}</p>
+          </div>
+        `;
+        productContainer.appendChild(productCard);
+      });
+    }
+
+    // Add item to cart while enforcing stock limits.
+    function addToCart(id, name, price, image, stock) {
+      const existingProduct = cart.find(item => item.id === id);
+
+      // Check for maximum number of unique products
+      if (!existingProduct && cart.length >= 5) {
+        alert("You can only add up to 5 different products to the cart.");
+        return;
+      }
+
+      // Calculate total quantity in cart
+      let totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+      if (existingProduct) {
+        // Check if adding more will exceed the total quantity limit
+        if (totalQuantity + 1 > 10) {
+          alert("You can only purchase up to a total of 10 items.");
+          return;
+        }
+
+        // Check if stock limit is reached
+        if (existingProduct.quantity < stock) {
+          existingProduct.quantity += 1;
+        } else {
+          alert(`You cannot add more than ${stock} items of ${name}.`);
+          return;
+        }
+      } else {
+        // Adding new product to cart
+        cart.push({ id, name, price, image, quantity: 1, stock: stock, selected: true });
+      }
+      updateCart();
+    }
+
+    function buyNow(id, name, price, image, stock) {
+  if (stock < 1) {
+    alert(`Sorry, ${name} is out of stock.`);
+    return;
+  }
+
+  // Clear the cart and add the selected item to it
+  cart = [{ id, name, price, image, quantity: 1, stock: stock, selected: true }];
+  localStorage.setItem("cart", JSON.stringify(cart)); // Save the new cart to localStorage
+
+  // Retrieve the CSRF token from the DOM
+  const csrfToken = getCookie('csrftoken');  // Assuming a function to get CSRF token from cookies
+
+
+  // Ensure the CSRF token is valid
+  if (!csrfToken) {
+    alert("CSRF token is missing. Please reload the page and try again.");
+    return;
+  }
+
+  // Store cart data in the session (this sends cart data to the server side)
+  fetch('/store-cart/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': csrfToken, // Ensure CSRF token is added here
+    },
+    body: JSON.stringify(cart),
+    credentials: 'include',  // Include cookies in the request
+  })
+  .then(response => {
+    if (response.ok) {
+      // Redirect to checkout after successful purchase
+      window.location.href = "{% url 'user_ordering_checkout' %}";
+    } else {
+      alert("Failed to store cart data. Please try again.");
+    }
+  })
+  .catch(error => {
+    console.error('Error storing cart data:', error);
+    alert("An error occurred. Please try again.");
+  });
+}
+
+function updateCart() {
+    localStorage.setItem("cart", JSON.stringify(cart));
+    const cartCount = document.getElementById("cart-count");
+    const cartDropdownItems = document.getElementById("cart-items");
+    const totalPriceElement = document.getElementById("total-price");
+
+    cartCount.textContent = cart.length;
+    cartDropdownItems.innerHTML = "";
+
+    let totalPrice = 0;
+    let allSelected = cart.length > 0;  // Assume all are selected
+
+    cart.forEach((item, index) => {
+        const itemTotal = item.price * item.quantity;
+        if (item.selected) {
+            totalPrice += itemTotal;
+        } else {
+            allSelected = false;  // If at least one item is unselected
+        }
+
+        const cartItem = document.createElement("div");
+        cartItem.classList.add("cart-item");
+        cartItem.innerHTML = `
+          <input type="checkbox" ${item.selected ? 'checked' : ''} 
+            onchange="toggleSelection(${index})">
+          <img src="${item.image}" alt="${item.name}" style="width: 50px; height: 50px;">
+          <span>${item.name} - ₱${item.price} x ${item.quantity} = ₱${itemTotal.toFixed(2)}</span>
+          <button onclick="removeFromCart(${index})">Remove</button>
+          <div class="quantity-buttons">
+            <button onclick="updateQuantity(${index}, -1)">-</button>
+            <span>${item.quantity}</span>
+            <button onclick="updateQuantity(${index}, 1)">+</button>
+          </div>
+        `;
+        cartDropdownItems.appendChild(cartItem);
+    });
+
+    totalPriceElement.textContent = `Total: ₱${totalPrice.toFixed(2)}`;
+
+    // Update the Select All checkbox state
+    const selectAllCheckbox = document.getElementById("select-all");
+    selectAllCheckbox.checked = allSelected;
+}
+
+
+    function toggleSelection(index) {
+      cart[index].selected = !cart[index].selected;
+      updateCart();
+    }
+
+    function removeFromCart(index) {
+      cart.splice(index, 1);
+      updateCart();
+    }
+
+    // Update quantity in cart with stock check.
+    function updateQuantity(index, increment) {
+      const item = cart[index];
+      let totalQuantity = cart.reduce((sum, product) => sum + product.quantity, 0);
+
+      if (increment > 0 && item.quantity < item.stock) {
+        // Check if the total quantity limit will be exceeded
+        if (totalQuantity + 1 > 10) {
+          alert("You can only purchase up to a total of 10 items.");
+          return;
+        }
+        item.quantity += increment;
+      } else if (increment > 0 && item.quantity >= item.stock) {
+        alert(`Maximum available stock for ${item.name} is ${item.stock}.`);
+      } else if (increment < 0) {
+        item.quantity += increment;
+        if (item.quantity <= 0) {
+          cart.splice(index, 1);
+        }
+      }
+      item.selected = true;  // Keep it selected after quantity change
+      updateCart();
+    }
+
+    function toggleCart() {
+      const cartDropdown = document.getElementById("cart-dropdown");
+      cartDropdown.classList.toggle("show");
+    }
+
+    function showDescription(imageElement) {
+      const productCard = imageElement.closest('.product-card');
+      const description = productCard.querySelector('.product-description');
+      description.style.display = description.style.display === "none" ? "block" : "none";
+    }
+
+    // Toggle the selection of all items
+    function toggleSelectAll(selectAllCheckbox) {
+      const isChecked = selectAllCheckbox.checked;
+      cart.forEach(item => {
+        item.selected = isChecked;
+      });
+      updateCart();
+    }
+
+    // Update total price based on selected items
+    function updateTotalPrice() {
+        let selectedTotal = 0;
+        const itemCheckboxes = document.querySelectorAll(".item-select");
+
+        itemCheckboxes.forEach((checkbox, index) => {
+            if (checkbox.checked) {
+                selectedTotal += cart[index].price * cart[index].quantity;
+            }
+        });
+
+        const totalPriceElement = document.getElementById("total-price");
+        totalPriceElement.textContent = `Total: ₱${selectedTotal.toFixed(2)}`;
+    }
+
+    function validateCheckout() {
+      const selectedItems = cart.filter(item => item.selected);  // Get only selected items
+
+      if (selectedItems.length === 0) {
+          alert("Please select at least one product before checking out.");
+          return;
+      }
+
+      // Save selected items to localStorage for checkout
+      localStorage.setItem("cart", JSON.stringify(selectedItems));
+
+      // Redirect to the checkout page
+      window.location.href = "{% url 'user_ordering_checkout' %}";
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+      fetchProducts();
+      updateCart();
+      document.getElementById("search-bar").addEventListener("input", filterProducts);
+    });
+
+    function filterProducts() {
+      const searchQuery = document.getElementById("search-bar").value.toLowerCase();
+      const filteredProducts = products.filter(product =>
+        product.name.toLowerCase().includes(searchQuery)
+      );
+      displayProducts(filteredProducts);
+    }
+
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,33 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logout</title>
+    <link rel="stylesheet" href="{% static 'myApp/css/admin-logout.css' %}">
+</head>
+<body>
+    <div class="sidebar">
+        <h2><a href="{% url 'admin_dashboard' %}">Bare Bears</a> 
+            <span class="admin-indicator" title="Admin Mode">Admin</span>
+        </h2>
+        
+        <ul>
+            <li><a href="{% url 'admin_ordering' %}" class="hover-effect">Ordering</a></li>
+            <li><a href="{% url 'admin_booking' %}" class="hover-effect">Booking</a></li>
+            <li><a href="{% url 'admin_pos' %}" class="hover-effect">POS</a></li>
+            <li><a href="{% url 'admin_inventory' %}" class="hover-effect">Inventory</a></li>
+            <li><a href="{% url 'admin_purchasing' %}" class="hover-effect">Purchasing</a></li>
+            <li><a href="{% url 'admin_logout' %}" class="hover-effect">Log Out</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <h1>You have been logged out</h1>
+        <p>We hope to see you again soon. If you want to log back in, click the button below.</p>
+        <a href="{% url 'login' %}" class="btn">Log In</a>
+    </div>
+
+</body>
+</html>

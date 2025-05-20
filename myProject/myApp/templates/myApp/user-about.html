@@ -1,0 +1,335 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About</title>
+</head>
+<body>
+
+    <style>
+        /* General Styles */
+body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      background-color: #f4f7f9;
+      color: #333;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: #2c3e50;
+      color: white;
+      padding: 25px 20px;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .sidebar h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 22px;
+      color: #f1c40f;
+      margin: 0;
+      text-align: center;
+      line-height: 1.4;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .user-info {
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    .user-info p {
+      font-weight: 600;
+      margin: 5px 0 3px;
+      font-size: 14px;
+      color: white; /* <-- add this line */
+    }
+
+    .user-indicator {
+      display: inline-block;
+      background: #27ae60;
+      color: white;
+      padding: 2px 8px;
+      font-size: 12px;
+      border-radius: 12px;
+      margin-top: 3px;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 30px;
+    }
+
+    .sidebar ul li a {
+      color: white;
+      text-decoration: none;
+      display: block;
+      padding: 12px 15px;
+      border-radius: 6px;
+      transition: background 0.3s, transform 0.2s;
+      font-size: 15px;
+    }
+
+    .sidebar ul li a:hover {
+      background: #34495e;
+      transform: translateX(6px);
+    }
+
+    .main-content {
+      margin-left: 280px;
+      padding: 30px;
+      width: calc(100% - 280px);
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      color: #2980b9;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+p {
+  color: #7f8c8d;
+}
+
+/* About Company Section */
+.about-company {
+  background-color: #fff;
+  padding: 40px;
+  margin: 20px auto;
+  max-width: 1200px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.about-company h2 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #2c3e50;
+}
+
+#story-placeholder {
+  font-size: 1.2rem;
+  text-align: justify;
+  line-height: 1.8;
+}
+
+/* Mission and Vision Section */
+.mission-vision {
+  background-color: #fff;
+  padding: 40px;
+  margin: 20px auto;
+  max-width: 1200px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.mission-vision h2 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #2c3e50;
+}
+
+.mission-vision h3 {
+  font-size: 1.8rem;
+  margin-top: 20px;
+  color: #2c3e50;
+}
+
+#mission-placeholder, #vision-placeholder {
+  font-size: 1.2rem;
+  text-align: justify;
+  line-height: 1.8;
+}
+
+/* Our Core Values Section */
+.our-values {
+  background-color: #fff;
+  padding: 40px;
+  margin: 20px auto;
+  max-width: 1200px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.our-values h2 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #2c3e50;
+}
+
+.our-values ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.our-values li {
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+  padding-left: 20px;
+  position: relative;
+}
+
+.our-values li::before {
+  content: '✔';
+  position: absolute;
+  left: 0;
+  color: #2c3e50;
+  font-size: 1.5rem;
+  top: 0;
+}
+
+/* Meet The Team Section */
+.meet-the-team {
+  background-color: #fff;
+  padding: 40px;
+  margin: 20px auto;
+  max-width: 1200px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.meet-the-team h2 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #2c3e50;
+}
+
+#team-placeholder {
+  font-size: 1.2rem;
+  text-align: justify;
+  line-height: 1.8;
+}
+
+/* Contact Us Section */
+.contact-info {
+  background-color: #fff;
+  padding: 40px;
+  margin: 20px auto;
+  max-width: 1200px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.contact-info h2 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #2c3e50;
+}
+
+#contact-placeholder {
+  font-size: 1.2rem;
+  text-align: justify;
+  line-height: 1.8;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .about-company, .mission-vision, .our-values, .meet-the-team, .contact-info {
+      padding: 20px;
+  }
+
+  .about-company h2, .mission-vision h2, .our-values h2, .meet-the-team h2, .contact-info h2 {
+      font-size: 2rem;
+  }
+
+  .mission-vision h3 {
+      font-size: 1.5rem;
+  }
+
+  .our-values li {
+      font-size: 1rem;
+  }
+
+  #story-placeholder, #mission-placeholder, #vision-placeholder, #team-placeholder, #contact-placeholder {
+      font-size: 1rem;
+  }
+}
+
+    </style>
+    
+  <div class="sidebar">
+  <h1>
+    <a href="{% url 'user_dashboard' %}" style="text-decoration: none; color: inherit;">
+      Bare Bears<br>Kadayawan
+    </a>
+  </h1>
+  <div class="user-info">
+    <p>Welcome, {{ username }}!</p>
+    <span class="user-indicator">User</span>
+  </div>
+
+  <ul>
+    <li><a href="{% url 'user_ordering' %}" class="hover-effect">Ordering</a></li>
+    <li><a href="{% url 'user_booking' %}" class="hover-effect">Booking</a></li>
+    <li><a href="{% url 'user_about' %}" class="hover-effect">About</a></li>
+    <li><a href="{% url 'user_settings' %}" class="hover-effect">Settings</a></li>
+     <li><a href="{% url 'user_logout' %}" class="hover-effect">Log Out</a></li>
+  </ul>
+</div>
+
+    <div class="main-content">
+
+        <section class="about-company">
+            <h2>Our Story</h2>
+            <p id="story-placeholder">
+                Bare Bears Kadayawan started as a small business with a vision to bring creativity and personality to everyday items. We specialize in hand-painted bear and rabbit designs, aiming to spread happiness and uniqueness through art. Over the years, our passion for crafting and artistic expression has helped us connect with customers looking for something truly special.
+            </p>
+        </section>
+
+        <section class="mission-vision">
+            <h2>Mission & Vision</h2>
+            <h3>Our Mission</h3>
+            <p id="mission-placeholder">
+                At Bare Bears Kadayawan, our mission is to provide high-quality, custom-designed products that inspire joy and bring warmth into the lives of our customers. We aim to offer unique artistic creations while ensuring an outstanding customer experience.
+            </p>
+            <h3>Our Vision</h3>
+            <p id="vision-placeholder">
+                We envision a future where Bare Bears Kadayawan is a household name for unique, handmade products, known for our commitment to creativity, quality, and customer satisfaction.
+            </p>
+        </section>
+
+        <section class="our-values">
+            <h2>Our Core Values</h2>
+            <ul>
+                <li>Creativity: We believe in the power of art to bring joy and make a lasting impression.</li>
+                <li>Quality: We are committed to providing the best products with attention to detail.</li>
+                <li>Customer Focus: We value our customers and aim to offer personalized, exceptional service.</li>
+                <li>Sustainability: We aim to reduce our environmental impact by using eco-friendly materials whenever possible.</li>
+            </ul>
+        </section>
+
+        <section class="meet-the-team">
+            <h2>Meet The Team</h2>
+            <p id="team-placeholder">
+                Our team is made up of passionate individuals dedicated to bringing Bare Bears Kadayawan’s vision to life. From our talented artists to our supportive staff, we work together to create products that make a difference.
+            </p>
+        </section>
+
+        <section class="contact-info">
+            <h2>Contact Us</h2>
+            <p id="contact-placeholder">
+                For inquiries, please reach out to us at: <br>
+                Email: barebearsdavao.info@gmail.com<br>
+                Phone: 0939 914 5203<br>
+                Location: Unit 1, SANJAC Building, Tionko Avenue, Brgy. 10-A (POB.), Davao City, Davao City, Philippines
+            </p>
+        </section>
+    </div>
+</body>
+</html>

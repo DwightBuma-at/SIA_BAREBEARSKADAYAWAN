@@ -1,0 +1,737 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+
+    <style>
+
+ body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      background-color: #f4f7f9;
+      color: #333;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: #2c3e50;
+      color: white;
+      padding: 25px 20px;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .sidebar h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 22px;
+      color: #f1c40f;
+      margin: 0;
+      text-align: center;
+      line-height: 1.4;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .user-info {
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    .user-info p {
+      font-weight: 600;
+      margin: 5px 0 3px;
+      font-size: 14px;
+    }
+
+    .admin-indicator {
+      display: inline-block;
+      background: #27ae60;
+      color: white;
+      padding: 2px 8px;
+      font-size: 12px;
+      border-radius: 12px;
+      margin-top: 3px;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 30px;
+    }
+
+    .sidebar ul li a {
+      color: white;
+      text-decoration: none;
+      display: block;
+      padding: 12px 15px;
+      border-radius: 6px;
+      transition: background 0.3s, transform 0.2s;
+      font-size: 15px;
+    }
+
+    .sidebar ul li a:hover {
+      background: #34495e;
+      transform: translateX(6px);
+    }
+
+    .main-content {
+      margin-left: 280px;
+      padding: 30px;
+      width: calc(100% - 280px);
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      color: #2980b9;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+/* Search Bar */
+.inventory-controls {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#searchInventory {
+  padding: 12px;
+  font-size: 16px;
+  width: 320px;
+  border-radius: 5px;
+  border: 1px solid #bdc3c7;
+  outline: none;
+  transition: border 0.3s;
+}
+
+#searchInventory:focus {
+  border-color: #2980b9;
+}
+
+/* Inventory Table */
+.transaction-list {
+  background: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  border-radius: 8px;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+th, td {
+  padding: 14px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background: #2980b9;
+  color: white;
+  font-weight: bold;
+}
+
+tr:hover {
+  background: #ecf0f1;
+  transition: background 0.3s;
+}
+
+/* Status Labels for Inventory Items */
+.status {
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.in-stock {
+  background: #27ae60;
+  color: white;
+}
+
+.out-of-stock {
+  background: #e74c3c;
+  color: white;
+}
+
+/* Inventory Item Action Buttons */
+.button-group {
+  display: inline-flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.button-group button {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.button-group button:hover {
+  background: #c0392b;
+}
+
+.edit {
+  background: #3498db;
+}
+
+.edit:hover {
+  background: #1abc9c;
+}
+
+.delete {
+  background: #e74c3c;
+}
+
+.delete:hover {
+  background: #c0392b;
+}
+
+.delete:active {
+  transform: scale(0.95);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .sidebar {
+      width: 220px;
+  }
+
+  .main-content {
+      margin-left: 240px;
+  }
+
+  table {
+      font-size: 14px;
+  }
+
+  th, td {
+      padding: 8px;
+  }
+}
+
+    table th, table td {
+        padding: 10px;
+        text-align: center;
+    }
+    table tr:nth-child(even) {
+        background-color: #f4f4f4;
+    }
+    button {
+        cursor: pointer;
+    }
+
+    /* Add styling for the product image */
+    .product-image {
+        max-width: 100px;
+        max-height: 100px;
+        object-fit: cover;
+    }
+
+    /* Container for adding a product */
+    .add-product input[type="file"] {
+        display: inline-block;
+        margin-top: 10px;
+    }
+    .inventory-container {
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Display image thumbnail */
+    .product-image-container {
+        width: 100px;
+        height: 100px;
+        overflow: hidden;
+        border: 1px solid #ccc;
+        margin-top: 10px;
+    }
+    .product-image-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .inventory-container button {
+        padding: 8px 14px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        font-size: 14px;
+    }
+
+    .inventory-container button:hover {
+        transform: scale(1.05);
+    }
+
+    button.remove-product-btn {
+        background-color: #f44336;
+        color: white;
+    }
+
+    button.remove-product-btn:hover {
+        background-color: #d32f2f;
+    }
+
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    }
+
+        .modal-content {
+        background-color: #fefefe;
+        margin: 10% auto; /* Adjust top margin to control vertical position */
+        padding: 20px;
+        border: 1px solid #888;
+        width: 50%; /* Adjust width for a more normal size */
+        max-width: 400px; /* Ensure it doesn't get too wide on larger screens */
+        border-radius: 8px;
+        position: relative;
+    }
+
+    .close-alert, .close-confirm, .close-prompt {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close-alert:hover,
+    .close-alert:focus,
+    .close-confirm:hover,
+    .close-confirm:focus,
+    .close-prompt:hover,
+    .close-prompt:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .modal p {
+        margin-bottom: 15px;
+    }
+
+    .modal button.btn {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        margin-left: 5px;
+    }
+
+    .modal button.btn-primary {
+        background-color: #007bff; /* Example primary color */
+        color: white;
+    }
+
+    .modal button.btn-secondary {
+        background-color: #6c757d; /* Example secondary color */
+        color: white;
+    }
+
+    .modal button.btn-danger {
+        background-color: #dc3545; /* Example danger color */
+        color: white;
+    }
+
+    #prompt-input {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    /* Styling for the specific placeholders */
+    #product-name::placeholder,
+    #product-price::placeholder,
+    #product-quantity::placeholder,
+    #search-product::placeholder {
+        color: #777; /* A slightly darker shade for better readability (normal color) */
+        font-style: italic; /* Indicate they are placeholders */
+        font-size: 14px; /* Slightly smaller than the input text */
+    }
+
+    /* Styling for the input boxes */
+    #product-name,
+    #product-price,
+    #product-quantity,
+    #search-product {
+        width: 180px; /* Reduced width */
+        padding: 8px; /* Reduced padding */
+        margin-bottom: 10px; /* Reduced margin */
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box; /* Ensure padding and border are included in the element's total width and height */
+        font-size: 14px; /* Match the button font size for better balance */
+    }
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <h1>
+    <a href="{% url 'admin_dashboard' %}" style="text-decoration: none; color: inherit;">
+      Bare Bears<br>Kadayawan
+    </a>
+  </h1>
+  <div class="user-info">
+    <p>Welcome, {{ username }}!</p>
+    <span class="admin-indicator">Administrator</span>
+  </div>
+
+  <ul>
+    <li><a href="{% url 'admin_ordering' %}">Ordering</a></li>
+    <li><a href="{% url 'admin_booking' %}">Booking</a></li>
+    <li><a href="{% url 'admin_pos' %}">POS</a></li>
+    <li><a href="{% url 'admin_inventory' %}">Inventory</a></li>
+    <li><a href="{% url 'admin_purchasing' %}">Purchasing</a></li>
+    <li><a href="{% url 'admin_logout' %}">Logout</a></li>
+  </ul>
+</div>
+    
+    <div class="main-content">
+        <h1>Inventory Management</h1>
+        <div class="inventory-container">
+            <div class="add-product">
+                <h3>Add Product</h3>
+                <input type="text" id="product-name" placeholder="Product Name">
+                <input type="number" id="product-price" placeholder="Product Price" step="0.01">
+                <input type="number" id="product-quantity" placeholder="Product Quantity">
+                <input type="file" id="product-image" accept="image/*">
+                
+                <div class="button-group">
+                    <button onclick="addProduct()">Add Product</button>
+                </div>
+            </div>
+
+            <div class="product-list">
+                <h3>Inventory</h3>
+                <input type="text" id="search-product" oninput="searchProduct()" placeholder="Search product...">
+                <table id="inventory-table">
+                    <thead>
+                        <tr>
+                            <th>Product ID</th>
+                            <th>Product Name</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Image</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventory-list"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+        <script>
+        let products = [];
+
+        // Generic function to show a custom alert modal
+        function showAlert(message) {
+            const alertModal = document.createElement('div');
+            alertModal.classList.add('modal');
+            alertModal.innerHTML = `
+                <div class="modal-content">
+                    <span class="close-alert">&times;</span>
+                    <p>${message}</p>
+                    <button class="btn btn-primary close-alert-btn">Okay</button>
+                </div>
+            `;
+            document.body.appendChild(alertModal);
+            alertModal.style.display = 'block';
+
+            const closeButton = alertModal.querySelector('.close-alert');
+            const okayButton = alertModal.querySelector('.close-alert-btn');
+
+            closeButton.onclick = function() {
+                alertModal.style.display = 'none';
+                document.body.removeChild(alertModal);
+            };
+
+            okayButton.onclick = function() {
+                alertModal.style.display = 'none';
+                document.body.removeChild(alertModal);
+            };
+
+            window.onclick = function(event) {
+                if (event.target === alertModal) {
+                    alertModal.style.display = 'none';
+                    document.body.removeChild(alertModal);
+                }
+            };
+        }
+
+        // Generic function to show a custom confirm modal
+        function showConfirm(message, callback) {
+            const confirmModal = document.createElement('div');
+            confirmModal.classList.add('modal');
+            confirmModal.innerHTML = `
+                <div class="modal-content">
+                    <span class="close-confirm">&times;</span>
+                    <p>${message}</p>
+                    <div style="display: flex; justify-content: flex-end;">
+                        <button class="btn btn-secondary confirm-cancel-btn">Cancel</button>
+                        <button class="btn btn-danger confirm-ok-btn">Okay</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(confirmModal);
+            confirmModal.style.display = 'block';
+
+            const closeButton = confirmModal.querySelector('.close-confirm');
+            const cancelButton = confirmModal.querySelector('.confirm-cancel-btn');
+            const okayButton = confirmModal.querySelector('.confirm-ok-btn');
+
+            closeButton.onclick = function() {
+                confirmModal.style.display = 'none';
+                document.body.removeChild(confirmModal);
+            };
+
+            cancelButton.onclick = function() {
+                confirmModal.style.display = 'none';
+                document.body.removeChild(confirmModal);
+            };
+
+            okayButton.onclick = function() {
+                confirmModal.style.display = 'none';
+                document.body.removeChild(confirmModal);
+                callback(); // Execute the callback function if Okay is clicked
+            };
+
+            window.onclick = function(event) {
+                if (event.target === confirmModal) {
+                    confirmModal.style.display = 'none';
+                    document.body.removeChild(confirmModal);
+                }
+            };
+        }
+
+        // Function to fetch inventory data from the backend on page load
+        function fetchInventory() {
+            fetch('/api/admininventory/')
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                    return response.json();
+                })
+                .then(data => {
+                    if (!Array.isArray(data)) throw new Error("Invalid inventory data received.");
+                    products = data;
+                    updateInventoryTable();
+                })
+                .catch(error => console.error('Error fetching inventory:', error));
+        }
+
+        function updateInventoryTable(filteredProducts = products) {
+            const inventoryList = document.getElementById("inventory-list");
+            inventoryList.innerHTML = "";
+
+            // Ensure products is an array
+            if (!Array.isArray(filteredProducts)) {
+                console.error("Products data is invalid:", filteredProducts);
+                return;
+            }
+
+            filteredProducts.sort((a, b) => (a.id || 0) - (b.id || 0));
+
+            filteredProducts.forEach(product => {
+                if (!product || !product.id) {
+                    console.warn("Skipping invalid product entry:", product);
+                    return;
+                }
+
+                const price = product.price ? `₱${Number(product.price).toFixed(2)}` : "N/A";
+                const productId = product.id ? product.id.toString().padStart(3, '0') : "N/A";
+
+                inventoryList.innerHTML +=
+                    `<tr>
+                        <td>${productId}</td>
+                        <td>${product.name || "N/A"}</td>
+                        <td>${price}</td>
+                        <td>
+                            ${product.stock || "0"}
+                            ${product.stock < 55 ? '<div style="color: red; font-weight: bold;">Stock is low</div>' : ''}
+                        </td>
+                        <td>
+                            ${product.image ? `<img src="${product.image}" class="product-image">` : 'No image'}
+                        </td>
+                        <td>
+                            <button class="remove-product-btn" onclick="removeProduct(${product.id})">Remove</button>
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        function getCSRFToken() {
+            return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        }
+
+        function addProduct() {
+            const name = document.getElementById("product-name").value.trim();
+            const price = parseFloat(document.getElementById("product-price").value);
+            const stock = parseInt(document.getElementById("product-quantity").value);
+            const image = document.getElementById("product-image").files[0];
+
+            if (!name || isNaN(price) || isNaN(stock) || price <= 0 || stock < 0) {
+                showAlert("Please fill in all fields with valid values.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('price', parseFloat(price).toFixed(2));
+            formData.append('stock', stock);
+            if (image) {
+                formData.append('image', image);
+            }
+
+            fetch('/api/admininventory/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                showAlert("Product added successfully!");
+                products.push(data);
+                updateInventoryTable();
+                // Clear the form fields after successful addition
+                document.getElementById("product-name").value = '';
+                document.getElementById("product-price").value = '';
+                document.getElementById("product-quantity").value = '';
+                document.getElementById("product-image").value = ''; // Reset file input
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert("Failed to add product.");
+            });
+        }
+
+        
+        // Custom function to show a prompt-like modal
+        function showPrompt(message, callback) {
+            const promptModal = document.createElement('div');
+            promptModal.classList.add('modal');
+            promptModal.innerHTML = `
+                <div class="modal-content">
+                    <span class="close-prompt">&times;</span>
+                    <p>${message}</p>
+                    <input type="text" id="prompt-input">
+                    <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+                        <button class="btn btn-secondary prompt-cancel-btn">Cancel</button>
+                        <button class="btn btn-primary prompt-ok-btn">Okay</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(promptModal);
+            promptModal.style.display = 'block';
+
+            const closeButton = promptModal.querySelector('.close-prompt');
+            const cancelButton = promptModal.querySelector('.prompt-cancel-btn');
+            const okayButton = promptModal.querySelector('.prompt-ok-btn');
+            const inputField = promptModal.querySelector('#prompt-input');
+
+            closeButton.onclick = function() {
+                promptModal.style.display = 'none';
+                document.body.removeChild(promptModal);
+                callback(null); // Indicate cancellation
+            };
+
+            cancelButton.onclick = function() {
+                promptModal.style.display = 'none';
+                document.body.removeChild(promptModal);
+                callback(null); // Indicate cancellation
+            };
+
+            okayButton.onclick = function() {
+                const inputValue = inputField.value.trim();
+                promptModal.style.display = 'none';
+                document.body.removeChild(promptModal);
+                callback(inputValue); // Pass the input value to the callback
+            };
+
+            window.onclick = function(event) {
+                if (event.target === promptModal) {
+                    promptModal.style.display = 'none';
+                    document.body.removeChild(promptModal);
+                    callback(null); // Indicate cancellation
+                }
+            };
+        }
+
+
+        function removeProduct(id) {
+            showConfirm("Are you sure you want to remove this product?", () => {
+                fetch(`/api/admininventory/${id}/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': getCSRFToken()
+                    }
+                })
+                .then(() => {
+                    showAlert("Product removed.");
+                    products = products.filter(p => p.id !== id);   // Remove the product from the list
+                    updateInventoryTable();   // Update the table
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert("Failed to remove product.");
+                });
+            });
+        }
+
+        // Function to search products
+        function searchProduct() {
+            const searchQuery = document.getElementById("search-product").value.toLowerCase();
+
+            // Filter the products based on the search query
+            const filteredProducts = products.filter(product => {
+                return product.name.toLowerCase().includes(searchQuery);
+            });
+
+            // Update the inventory table with the filtered products
+            updateInventoryTable(filteredProducts);   // Pass the filtered products
+        }
+
+        // Fetch the inventory data when the page loads
+        window.onload = fetchInventory;
+    </script>
+</body>
+</html>
